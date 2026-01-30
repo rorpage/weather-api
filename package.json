@@ -1,0 +1,18 @@
+{
+  "name": "weather-api",
+  "version": "1.0.0",
+  "description": "Weather API using OpenWeatherMap 3.0 One Call endpoint",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": ["weather", "api", "vercel"],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.x"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@vercel/node": "^3.2.12",
+    "typescript": "^5.7.3"
+  }
+}

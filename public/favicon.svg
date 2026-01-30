@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Sun rays -->
+  <circle cx="50" cy="50" r="35" fill="#FFD700"/>
+  <path d="M50 5 L50 15 M50 85 L50 95 M15 50 L5 50 M85 50 L95 50 M23 23 L16 16 M77 77 L84 84 M77 23 L84 16 M23 77 L16 84"
+        stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Sunglasses frame -->
+  <ellipse cx="35" cy="45" rx="10" ry="8" fill="#000"/>
+  <ellipse cx="65" cy="45" rx="10" ry="8" fill="#000"/>
+  <path d="M45 45 L55 45" stroke="#000" stroke-width="2"/>
+
+  <!-- Smile -->
+  <path d="M35 60 Q50 70 65 60" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>
