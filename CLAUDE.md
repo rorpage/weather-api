@@ -8,8 +8,6 @@ A TypeScript-based Vercel serverless API that provides weather data from OpenWea
 
 ## Development Commands
 
-This project uses Vercel CLI for development and deployment. There are no npm scripts defined.
-
 **Prerequisites:**
 
 - Node.js >= 24.x
@@ -18,26 +16,46 @@ This project uses Vercel CLI for development and deployment. There are no npm sc
 **Development:**
 
 ```bash
-vercel dev
+npm run dev          # Start Vercel dev server (http://localhost:3000)
+npm run test:watch   # Run tests in watch mode while developing
 ```
 
-Starts the Vercel development server on http://localhost:3000. TypeScript files are automatically compiled by Vercel.
+**Testing:**
+
+```bash
+npm test                # Run all tests
+npm run test:coverage   # Run tests with coverage report
+npm run test:ui         # Run tests with browser UI
+```
+
+**Code Quality:**
+
+```bash
+npm run lint         # Check for linting errors
+npm run lint:fix     # Auto-fix linting errors
+npm run format       # Format all code with Prettier
+npm run format:check # Check formatting without modifying files
+npm run type-check   # Run TypeScript type checking
+npm run check        # Run ALL checks (format, lint, type-check, test)
+```
 
 **Deployment:**
 
 ```bash
-vercel
+vercel               # Deploy to Vercel
 ```
 
-Deploys to Vercel. Ensure `OPENWEATHERMAP_API_KEY` and `API_TOKEN` environment variables are set in Vercel project settings.
+The `npm run check` command runs automatically before every Vercel deployment via the `buildCommand` in vercel.json. This ensures all quality checks pass before code is deployed.
 
-**Type Checking:**
+**Pre-commit Hooks:**
 
-```bash
-npx tsc --noEmit
-```
+Husky automatically runs before each commit:
 
-Manually run TypeScript compiler to check for type errors without emitting files.
+- Formats staged TypeScript files with Prettier
+- Lints staged files with ESLint (auto-fixes when possible)
+- Type-checks the entire project
+
+This ensures all committed code meets quality standards.
 
 ## Architecture
 
@@ -108,6 +126,56 @@ Full TypeScript coverage with models organized by domain:
 
 Output types (e.g., WeatherOutput) define the final API response format. Response types (e.g., WeatherResponse) define the external API response structure.
 
+## Testing & Quality
+
+### Test Coverage Requirements
+
+- **Minimum thresholds**: 80% lines/functions, 75% branches, 80% statements
+- **Current coverage**: 97%+ across all metrics
+- Tests are enforced via Vercel buildCommand - deployment blocked if tests fail
+
+### Writing Tests
+
+Tests are located in `__tests__/` mirroring the source structure:
+
+```
+__tests__/
+  lib/              # Tests for lib/ utilities
+  services/         # Tests for services/ with mocked fetch
+  api/              # Integration tests for endpoints
+```
+
+**Testing patterns:**
+
+- **Pure functions** (lib/middleware.ts): Test with vi.stubEnv() for environment variables
+- **Services**: Mock fetch with vi.stubGlobal('fetch', mockFn)
+- **ApiEndpoint subclasses**: Create mock subclass to test base class behavior
+- **Endpoints**: Mock the service layer, focus on data transformation
+
+**Mock setup example:**
+
+```typescript
+// Use vi.hoisted to avoid initialization issues
+const { mockFn } = vi.hoisted(() => ({
+  mockFn: vi.fn(),
+}));
+
+vi.mock('../../services/MyService', () => ({
+  MyService: vi.fn().mockImplementation(() => ({
+    myMethod: mockFn,
+  })),
+}));
+```
+
+### Code Quality Standards
+
+- **ESLint**: TypeScript-specific rules with type-checked linting
+- **Prettier**: Single quotes, 100 char line width, trailing commas
+- **TypeScript**: Strict mode enabled, no implicit any
+- **Pre-commit hooks**: Automated formatting and linting on git commit
+
+Run `npm run check` before pushing to ensure all quality checks pass.
+
 ## Adding New Features
 
 ### New Endpoint
@@ -127,9 +195,20 @@ Output types (e.g., WeatherOutput) define the final API response format. Respons
    - Implement `getRequiredParams()` and `process()`
    - Export default Vercel handler function
 
-4. **Update environment**:
+4. **Write tests** in `__tests__/api/[name].test.ts`:
+   - Test successful requests with mocked service
+   - Test validation errors (missing params, invalid method, auth)
+   - Test error handling (service failures)
+   - Aim for 80%+ coverage
+
+5. **Update environment**:
    - Add required env vars to `.env.example`
    - Document in README.md
+
+6. **Run quality checks**:
+   ```bash
+   npm run check  # Ensures tests pass and code quality standards met
+   ```
 
 ### Modifying Existing Endpoints
 
@@ -137,6 +216,8 @@ Output types (e.g., WeatherOutput) define the final API response format. Respons
 - Required parameters are defined in `getRequiredParams()`
 - External API changes require updating service classes and response types
 - Output format changes require updating output types
+- **Always update tests** when modifying functionality
+- Run `npm run test:watch` during development for instant feedback
 
 ## Environment Variables
 
