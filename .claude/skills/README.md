@@ -2,6 +2,24 @@
 
 This directory contains Claude Code skills that allow you to query the weather API directly from your development environment.
 
+## Skill Format
+
+Skills in Claude Code use **Markdown files with YAML frontmatter**, with this structure:
+
+```
+.claude/skills/
+├── metar/
+│   └── SKILL.md          (required - exact filename)
+├── weather/
+│   └── SKILL.md
+├── airport-weather/
+│   └── SKILL.md
+└── compare-weather/
+    └── SKILL.md
+```
+
+Each skill directory name becomes a `/slash-command`.
+
 ## Available Skills
 
 ### 1. `/metar` - Aviation Weather
