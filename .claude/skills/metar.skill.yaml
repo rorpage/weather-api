@@ -1,0 +1,31 @@
+name: metar
+description: Get current METAR aviation weather data for an airport
+version: 1.0.0
+
+arguments:
+  - name: airport_id
+    description: Airport identifier (e.g., KJFK, KUMP, EGLL, KSEA)
+    type: string
+    required: false
+    default: KUMP
+
+instructions: |
+  You are fetching METAR (aviation weather) data for an airport. After receiving the response:
+
+  1. Present the data in a clear, readable format
+  2. Highlight important safety information (low visibility, strong winds, poor flight category)
+  3. Explain what the flight category means (VFR, MVFR, IFR, LIFR)
+  4. If the user asks, explain any aviation weather terms
+
+  The API endpoint is: GET /api/metar?id={airport_id}
+  The API requires authentication via the x-api-token header from the API_TOKEN environment variable.
+
+  Present the information in this format:
+  - Airport ID and observation time
+  - Flight category with explanation
+  - Temperature and dewpoint
+  - Wind conditions
+  - Visibility
+  - Sky conditions (cloud layers)
+  - Altimeter setting
+  - Raw METAR text for reference

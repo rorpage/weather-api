@@ -1,0 +1,45 @@
+name: airport-weather
+description: Get comprehensive weather briefing for an airport (both METAR and civilian weather)
+version: 1.0.0
+
+arguments:
+  - name: airport_id
+    description: Airport identifier (e.g., KJFK, KUMP, EGLL, KSEA)
+    type: string
+    required: true
+
+  - name: units
+    description: Units for temperature (metric or imperial)
+    type: string
+    required: false
+    default: metric
+
+instructions: |
+  You are providing a comprehensive weather briefing for an airport. This involves two steps:
+
+  1. First, fetch the METAR data for the airport to get:
+     - Aviation-specific weather (flight category, altimeter, etc.)
+     - The airport's coordinates (latDeg, lonDeg from the response)
+
+  2. Then, use those coordinates to fetch civilian weather data:
+     - Current conditions and forecast
+     - Additional context not in METAR
+
+  API endpoints:
+  - GET /api/metar?id={airport_id}
+  - GET /api/weather?lat={lat}&lon={lon}&units={units}
+
+  Both require authentication via the x-api-token header from the API_TOKEN environment variable.
+
+  Present the information in two sections:
+
+  ## Aviation Weather (METAR)
+  - Flight category, visibility, sky conditions
+  - Wind, altimeter, raw METAR
+
+  ## General Weather
+  - Current temperature and conditions
+  - Today's high/low forecast
+  - Feels like temperature
+
+  This gives pilots and travelers a complete weather picture for the airport.

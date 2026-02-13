@@ -1,0 +1,44 @@
+name: compare-weather
+description: Compare current weather conditions across multiple airports
+version: 1.0.0
+
+arguments:
+  - name: airports
+    description: Comma-separated list of airport identifiers (e.g., "KJFK,KLAX,KORD")
+    type: string
+    required: true
+
+  - name: units
+    description: Units for temperature (metric or imperial)
+    type: string
+    required: false
+    default: metric
+
+instructions: |
+  You are comparing weather conditions across multiple airports. This helps users:
+  - Choose between destination airports
+  - Plan multi-leg flights
+  - Compare weather in different cities
+
+  Steps:
+  1. Parse the comma-separated airport list
+  2. For each airport, fetch METAR data: GET /api/metar?id={airport_id}
+  3. Extract coordinates from each METAR response
+  4. For each location, fetch weather: GET /api/weather?lat={lat}&lon={lon}&units={units}
+
+  All API calls require authentication via the x-api-token header from the API_TOKEN environment variable.
+
+  Present the comparison in a clear table or list format:
+
+  For each airport, show:
+  - Airport ID
+  - Current temperature and conditions
+  - Flight category (from METAR)
+  - Wind conditions
+  - Visibility
+  - Today's high/low
+
+  At the end, provide a brief summary comparing the locations:
+  - Which has the best weather?
+  - Any weather warnings or concerns?
+  - Recommendations based on the conditions
