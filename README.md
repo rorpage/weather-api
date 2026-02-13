@@ -142,19 +142,15 @@ The project uses Husky and lint-staged to automatically run quality checks befor
 
 This ensures all committed code meets quality standards.
 
-### Continuous Integration
+### Quality Assurance
 
-The project is configured to run all quality checks before deployment via the `vercel-build` script:
+All code quality checks are enforced via pre-commit hooks using Husky:
 
-```json
-{
-  "scripts": {
-    "vercel-build": "npm run check"
-  }
-}
-```
+- **Before each commit**: Formats, lints, and type-checks code automatically
+- **77 tests** with 97%+ coverage ensure reliability
+- **Strict TypeScript** mode catches errors at compile time
 
-Vercel automatically runs the `vercel-build` script during deployment. This prevents deployment if any tests fail or quality checks don't pass.
+This ensures only high-quality, tested code makes it into the repository and gets deployed.
 
 ### Testing Stack
 
