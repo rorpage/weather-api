@@ -95,7 +95,7 @@ Compare weather across multiple locations.
 
 1. **Weather API running locally:**
    ```bash
-   npm run dev
+   npm start
    ```
    The API should be accessible at `http://localhost:3000`
 
@@ -112,7 +112,7 @@ Compare weather across multiple locations.
 
 ### Using the Skills
 
-1. Make sure your weather API is running (`npm run dev`)
+1. Make sure your weather API is running (`npm start`)
 2. Ensure `API_TOKEN` is set in your environment
 3. In Claude Code, use the skills with `/skill-name`
 
@@ -124,7 +124,7 @@ Compare weather across multiple locations.
 
 **"Connection refused" error:**
 - Make sure the API is running on `http://localhost:3000`
-- Check that you ran `npm run dev` or `vercel dev`
+- Check that you ran `npm start`
 
 **"Invalid API token" error:**
 - Verify the `API_TOKEN` in your environment matches the one in `.env.local`

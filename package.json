@@ -4,7 +4,7 @@
   "description": "Weather API using OpenWeatherMap 3.0 One Call endpoint",
   "main": "index.js",
   "scripts": {
-    "dev": "vercel dev",
+    "start": "npx vercel dev",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

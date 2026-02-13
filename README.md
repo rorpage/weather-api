@@ -83,7 +83,7 @@ npm i -g vercel
 Run the development server:
 
 ```bash
-npm run dev
+npm start
 ```
 
 The TypeScript files will be automatically compiled by Vercel during development and deployment.

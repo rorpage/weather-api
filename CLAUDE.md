@@ -16,7 +16,7 @@ A TypeScript-based Vercel serverless API that provides weather data from OpenWea
 **Development:**
 
 ```bash
-npm run dev          # Start Vercel dev server (http://localhost:3000)
+npm start            # Start Vercel dev server (http://localhost:3000)
 npm run test:watch   # Run tests in watch mode while developing
 ```
 
