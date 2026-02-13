@@ -3,8 +3,25 @@
   "version": "1.0.0",
   "description": "Weather API using OpenWeatherMap 3.0 One Call endpoint",
   "main": "index.js",
-  "scripts": {},
-  "keywords": ["weather", "api", "vercel"],
+  "scripts": {
+    "dev": "vercel dev",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,json,md}\"",
+    "type-check": "tsc --noEmit",
+    "check": "npm run format:check && npm run lint && npm run type-check && npm run test",
+    "prepare": "husky"
+  },
+  "keywords": [
+    "weather",
+    "api",
+    "vercel"
+  ],
   "author": "",
   "license": "MIT",
   "engines": {
@@ -12,7 +29,17 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
+    "@typescript-eslint/eslint-plugin": "^8.19.0",
+    "@typescript-eslint/parser": "^8.19.0",
     "@vercel/node": "^3.2.12",
-    "typescript": "^5.7.3"
+    "@vitest/coverage-v8": "^2.1.0",
+    "@vitest/ui": "^2.1.0",
+    "eslint": "^9.16.0",
+    "eslint-config-prettier": "^10.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.0"
   }
 }

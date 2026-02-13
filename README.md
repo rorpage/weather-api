@@ -36,6 +36,7 @@ To add a new endpoint:
 1. Create a service class in `services/` for external API communication
 2. Define your models in `models/[category]/`
 3. Create an endpoint class that extends `ApiEndpoint`:
+
    ```typescript
    class MyEndpoint extends ApiEndpoint {
      protected getRequiredParams(): string[] {
@@ -51,11 +52,13 @@ To add a new endpoint:
 ## Setup
 
 1. Copy `.env.example` to `.env.local`:
+
    ```bash
    cp .env.example .env.local
    ```
 
 2. Add your OpenWeatherMap API key and API token to `.env.local`:
+
    ```
    OPENWEATHERMAP_API_KEY=your_actual_api_key
    API_TOKEN=your_secure_random_token
@@ -66,21 +69,98 @@ To add a new endpoint:
 ## Development
 
 Install dependencies:
+
 ```bash
 npm install
 ```
 
 Install Vercel CLI if you haven't already:
+
 ```bash
 npm i -g vercel
 ```
 
 Run the development server:
+
 ```bash
 npm run dev
 ```
 
 The TypeScript files will be automatically compiled by Vercel during development and deployment.
+
+## Testing & Quality
+
+This project uses a comprehensive testing and linting infrastructure to ensure code quality:
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests with UI (browser-based)
+npm run test:ui
+```
+
+**Test Coverage:** The project maintains 80%+ test coverage for lines/functions and 75%+ for branches, verified on every build.
+
+### Code Quality Checks
+
+```bash
+# Run all quality checks (formatting, linting, type-checking, tests)
+npm run check
+
+# Format code with Prettier
+npm run format
+
+# Check code formatting (doesn't modify files)
+npm run format:check
+
+# Lint code with ESLint
+npm run lint
+
+# Auto-fix linting issues
+npm run lint:fix
+
+# Type check with TypeScript
+npm run type-check
+```
+
+### Pre-commit Hooks
+
+The project uses Husky and lint-staged to automatically run quality checks before each commit:
+
+- **Formats** staged files with Prettier
+- **Lints** staged files with ESLint (auto-fixes when possible)
+- **Type-checks** the entire project
+
+This ensures all committed code meets quality standards.
+
+### Continuous Integration
+
+The project is configured to run all quality checks before deployment via Vercel's `buildCommand`:
+
+```json
+{
+  "buildCommand": "npm run check"
+}
+```
+
+This prevents deployment if any tests fail or quality checks don't pass.
+
+### Testing Stack
+
+- **Vitest**: Fast, modern test runner with native TypeScript support
+- **ESLint**: Code linting with TypeScript-specific rules
+- **Prettier**: Opinionated code formatting
+- **TypeScript**: Strict type checking
+- **Husky + lint-staged**: Git hooks for pre-commit checks
 
 ## API Usage
 
@@ -91,14 +171,17 @@ The TypeScript files will be automatically compiled by Vercel during development
 **Method:** `GET`
 
 **Headers:**
+
 - `x-api-token` (required): API token for authentication
 
 **Query Parameters:**
+
 - `lat` (required): Latitude coordinate
 - `lon` (required): Longitude coordinate
 - `units` (optional): Units of measurement (`standard`, `metric`, or `imperial`). Default: `metric`
 
 **Example Request:**
+
 ```bash
 curl -H "x-api-token: your_token_here" \
   "http://localhost:3000/api/weather?lat=40.7128&lon=-74.0060&units=imperial"
@@ -111,12 +194,15 @@ curl -H "x-api-token: your_token_here" \
 **Method:** `GET`
 
 **Headers:**
+
 - `x-api-token` (required): API token for authentication
 
 **Query Parameters:**
+
 - `id` (optional): Airport identifier (e.g., KUMP, KJFK). Default: `KUMP`
 
 **Example Request:**
+
 ```bash
 curl -H "x-api-token: your_token_here" \
   "http://localhost:3000/api/metar?id=KJFK"
@@ -125,6 +211,7 @@ curl -H "x-api-token: your_token_here" \
 ## Deployment
 
 Deploy to Vercel:
+
 ```bash
 vercel
 ```

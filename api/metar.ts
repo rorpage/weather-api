@@ -48,7 +48,7 @@ class MetarEndpoint extends ApiEndpoint {
     const time = `${hours_display}:${minutes_display} L`;
 
     // Format sky conditions
-    const sky_conditions: SkyCondition[] = metarData.CloudLayers.map(sc => {
+    const sky_conditions: SkyCondition[] = metarData.CloudLayers.map((sc) => {
       const base = Math.round(sc.height);
 
       let cover_display = sc.type;
@@ -71,7 +71,7 @@ class MetarEndpoint extends ApiEndpoint {
       return {
         base,
         cover: sc.type,
-        description
+        description,
       };
     });
 
@@ -95,8 +95,8 @@ class MetarEndpoint extends ApiEndpoint {
       wind: {
         description: windDescription,
         direction: metarData.windDir,
-        speed: metarData.windSpeed
-      }
+        speed: metarData.windSpeed,
+      },
     };
   }
 }

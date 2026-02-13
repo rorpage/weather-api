@@ -4,3 +4,11 @@ node_modules
 .env*
 
 .vercel
+
+# Test coverage
+coverage/
+.vitest/
+
+# Logs
+*.log
+npm-debug.log*

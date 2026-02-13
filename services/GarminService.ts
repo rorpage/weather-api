@@ -14,7 +14,7 @@ export class GarminService {
       throw new Error(`Failed to fetch airport data: ${errorText}`);
     }
 
-    return await response.json() as AirportResponse;
+    return (await response.json()) as AirportResponse;
   }
 
   /**
@@ -32,6 +32,6 @@ export class GarminService {
       throw new Error(`Failed to fetch METAR data: ${errorText}`);
     }
 
-    return await response.json() as MetarResponse;
+    return (await response.json()) as MetarResponse;
   }
 }

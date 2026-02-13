@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "buildCommand": "npm run check",
   "env": {
     "NODE_OPTIONS": "--no-deprecation"
   }

@@ -14,7 +14,11 @@ export class OpenWeatherMapService {
   /**
    * Fetch current weather data from OpenWeatherMap One Call API 3.0
    */
-  async getCurrentWeather(lat: string | string[], lon: string | string[], units: string = 'metric'): Promise<WeatherResponse> {
+  async getCurrentWeather(
+    lat: string | string[],
+    lon: string | string[],
+    units: string = 'metric'
+  ): Promise<WeatherResponse> {
     const latStr = Array.isArray(lat) ? lat[0] : lat;
     const lonStr = Array.isArray(lon) ? lon[0] : lon;
 
@@ -32,6 +36,6 @@ export class OpenWeatherMapService {
       throw new Error(`Failed to fetch weather data: ${JSON.stringify(errorData)}`);
     }
 
-    return await response.json() as WeatherResponse;
+    return (await response.json()) as WeatherResponse;
   }
 }

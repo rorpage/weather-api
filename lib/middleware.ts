@@ -21,14 +21,14 @@ export function validateAuth(headers: IncomingHttpHeaders): ValidationError | nu
   if (!apiToken) {
     return {
       status: 500,
-      error: 'Server configuration error: API token not set'
+      error: 'Server configuration error: API token not set',
     };
   }
 
   if (!requestToken || requestToken !== apiToken) {
     return {
       status: 401,
-      error: 'Unauthorized: Invalid or missing API token'
+      error: 'Unauthorized: Invalid or missing API token',
     };
   }
 
@@ -42,12 +42,12 @@ export function validateParams(
   query: { [key: string]: string | string[] | undefined },
   requiredParams: string[]
 ): ValidationError | null {
-  const missing = requiredParams.filter(param => !query[param]);
+  const missing = requiredParams.filter((param) => !query[param]);
 
   if (missing.length > 0) {
     return {
       status: 400,
-      error: `Missing required parameters: ${missing.join(', ')}`
+      error: `Missing required parameters: ${missing.join(', ')}`,
     };
   }
 

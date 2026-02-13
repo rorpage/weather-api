@@ -42,12 +42,11 @@ export abstract class ApiEndpoint {
       const data = await this.process(req);
 
       return res.status(200).json(data);
-
     } catch (error) {
       console.error(`Error in ${this.constructor.name}:`, error);
       return res.status(500).json({
         error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
