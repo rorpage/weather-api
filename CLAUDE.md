@@ -45,7 +45,7 @@ npm run check        # Run ALL checks (format, lint, type-check, test)
 vercel               # Deploy to Vercel
 ```
 
-The `npm run check` command runs automatically before every Vercel deployment via the `buildCommand` in vercel.json. This ensures all quality checks pass before code is deployed.
+The `npm run check` command runs automatically before every Vercel deployment via the `vercel-build` script in package.json. This ensures all quality checks pass before code is deployed.
 
 **Pre-commit Hooks:**
 
@@ -132,7 +132,7 @@ Output types (e.g., WeatherOutput) define the final API response format. Respons
 
 - **Minimum thresholds**: 80% lines/functions, 75% branches, 80% statements
 - **Current coverage**: 97%+ across all metrics
-- Tests are enforced via Vercel buildCommand - deployment blocked if tests fail
+- Tests are enforced via Vercel's `vercel-build` script - deployment blocked if tests fail
 
 ### Writing Tests
 

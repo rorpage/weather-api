@@ -144,15 +144,17 @@ This ensures all committed code meets quality standards.
 
 ### Continuous Integration
 
-The project is configured to run all quality checks before deployment via Vercel's `buildCommand`:
+The project is configured to run all quality checks before deployment via the `vercel-build` script:
 
 ```json
 {
-  "buildCommand": "npm run check"
+  "scripts": {
+    "vercel-build": "npm run check"
+  }
 }
 ```
 
-This prevents deployment if any tests fail or quality checks don't pass.
+Vercel automatically runs the `vercel-build` script during deployment. This prevents deployment if any tests fail or quality checks don't pass.
 
 ### Testing Stack
 
