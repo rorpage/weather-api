@@ -11,40 +11,27 @@ Get current weather and today's forecast for coordinates **$0** (latitude) and *
 
 ## Instructions
 
-1. Make an HTTP request to the local weather API:
+**IMPORTANT: Do NOT show raw JSON or curl commands in your response. Only show the final formatted markdown output.**
+
+1. Silently fetch the weather data:
    ```bash
-   curl -H "x-api-token: ${API_TOKEN}" \
-     "http://localhost:3000/api/weather?lat=$0&lon=$1&units=${2:-metric}"
+   data=$(curl -s -H "x-api-token: ${API_TOKEN}" "http://localhost:3000/api/weather?lat=$0&lon=$1&units=${2:-metric}")
    ```
 
-2. Parse the JSON response and present:
+2. Parse the JSON and present ONLY clean markdown with:
+   - Current temperature and conditions
+   - Feels like temperature
+   - Today's high and low
+   - Weather description
+   - Contextual advice (e.g., "Perfect weather for outdoor activities")
 
-   - **Current Conditions**:
-     - Temperature (with degree symbol)
-     - Feels like temperature
-     - Weather description (e.g., "clear sky", "light rain")
+3. Use emoji and formatting for visual clarity.
 
-   - **Today's Forecast**:
-     - High temperature
-     - Low temperature
-     - Expected conditions
-
-3. Add context to make it conversational:
-   - "It's quite cold" or "Perfect weather"
-   - Suggest appropriate clothing/activities
-   - Mention if there's a significant difference between actual and feels-like temp
-
-4. If units parameter is provided:
-   - `metric`: Celsius (default)
+4. Units:
+   - `metric` (default): Celsius
    - `imperial`: Fahrenheit
    - `standard`: Kelvin
 
-5. If the request fails, check that:
-   - The API is running (`npm start`)
-   - API_TOKEN environment variable is set
-   - Coordinates are valid (-90 to 90 for lat, -180 to 180 for lon)
+## Example Output Style
 
-## Example Usage
-
-`/weather 40.7128 -74.0060` - Weather for New York City (metric)
-`/weather 51.5074 -0.1278 imperial` - Weather for London in Fahrenheit
+Use headers like `## 🌤️ Weather for Location`, bullet points, and add helpful context about conditions.

@@ -7,37 +7,32 @@ allowed-tools: Bash
 
 # METAR Weather Skill
 
-Get METAR aviation weather data for airport **$ARGUMENTS** (default: KUMP if not specified).
+Get METAR aviation weather data for airport **${0:-KUMP}**.
 
 ## Instructions
 
-1. Make an HTTP request to the local weather API:
+**IMPORTANT: Do NOT show raw JSON or curl commands in your response. Only show the final formatted markdown output.**
+
+1. Silently fetch the METAR data:
    ```bash
-   curl -H "x-api-token: ${API_TOKEN}" \
-     "http://localhost:3000/api/metar?id=${0:-KUMP}"
+   data=$(curl -s -H "x-api-token: ${API_TOKEN}" "http://localhost:3000/api/metar?id=${0:-KUMP}")
    ```
 
-2. Parse the JSON response and present the following information clearly:
+2. Parse the JSON and present ONLY clean markdown with:
+   - Airport ID and observation time
+   - Flight category with clear explanation (VFR/MVFR/IFR/LIFR)
+   - Temperature and dewpoint in Celsius
+   - Wind conditions (direction and speed)
+   - Visibility in statute miles
+   - Sky conditions (cloud layers)
+   - Altimeter setting
+   - Raw METAR text
+   - Weather assessment
 
-   - **Airport ID**: The station identifier
-   - **Observation Time**: When the METAR was issued
-   - **Flight Category**: VFR, MVFR, IFR, or LIFR (explain what this means)
-   - **Temperature**: Current temperature in Celsius
-   - **Dewpoint**: Dewpoint in Celsius
-   - **Wind**: Direction and speed (explain if calm)
-   - **Visibility**: Distance in statute miles
-   - **Sky Conditions**: Cloud layers with coverage and altitude
-   - **Altimeter**: Barometric pressure setting
-   - **Raw METAR**: The complete METAR text
+3. Use emoji, headings, and formatting for clarity.
 
-3. Highlight any significant weather concerns (low visibility, strong winds, poor flight category)
+4. Highlight any significant weather concerns.
 
-4. If the request fails, check that:
-   - The API is running (`npm start`)
-   - API_TOKEN environment variable is set
-   - The airport code is valid
+## Example Output Style
 
-## Example Usage
-
-`/metar KJFK` - Get METAR for JFK International
-`/metar` - Get METAR for default airport (KUMP)
+Use headers like `## 🛩️ METAR for AIRPORT`, bullet points, and a final `### Weather Assessment` section.

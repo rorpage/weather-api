@@ -11,45 +11,42 @@ Compare weather at multiple airports: **$ARGUMENTS**
 
 ## Instructions
 
-This skill fetches weather for multiple airports and presents a comparison.
+**IMPORTANT: Do NOT show raw JSON or curl commands in your response. Only show the final formatted markdown output.**
 
 ### Step 1: Parse Airport List
 
-Split the arguments to get individual airport codes. The last argument may be units (metric/imperial).
+Split arguments to get airport codes. Last argument may be units (metric/imperial).
 
-### Step 2: Fetch Data for Each Airport
+### Step 2: Silently Fetch Data for Each Airport
 
-For each airport code, make two API calls:
+For each airport, make API calls silently:
 
-1. **Get METAR** (for coordinates and flight category):
 ```bash
-curl -H "x-api-token: ${API_TOKEN}" \
-  "http://localhost:3000/api/metar?id={AIRPORT}"
+metar=$(curl -s -H "x-api-token: ${API_TOKEN}" "http://localhost:3000/api/metar?id={AIRPORT}")
+weather=$(curl -s -H "x-api-token: ${API_TOKEN}" "http://localhost:3000/api/weather?lat={lat}&lon={lon}&units={units}")
 ```
 
-2. **Get Weather** (using coordinates from METAR):
-```bash
-curl -H "x-api-token: ${API_TOKEN}" \
-  "http://localhost:3000/api/weather?lat={lat}&lon={lon}&units={units}"
-```
+### Step 3: Present Clean Comparison
 
-### Step 3: Present Comparison Table
-
-Create a clear comparison showing for each airport:
+Create a markdown table:
 
 | Airport | Temperature | Conditions | Flight Category | Wind | Visibility |
 |---------|-------------|------------|----------------|------|------------|
-| KJFK    | 15°C        | Clear sky  | VFR            | 10kt | 10 SM      |
-| KLAX    | 22°C        | Partly cloudy | VFR         | 5kt  | 10 SM      |
 
-### Step 4: Provide Recommendations
+### Step 4: Detailed Analysis
 
-- Which airport has the best weather?
-- Any weather concerns at specific locations?
-- Best choice for VFR flying?
-- Temperature differences to note
+For each airport, show:
+- Current conditions summary
+- Forecast for today
+- Key metrics
 
-## Example Usage
+### Step 5: Recommendations
 
-`/compare-weather KJFK KLAX KORD` - Compare three major airports
-`/compare-weather KSEA KPDX imperial` - Seattle vs Portland in Fahrenheit
+- Which airport has best weather?
+- Any concerns?
+- Best for VFR flying?
+- Notable differences
+
+## Example Output Style
+
+Use clean markdown tables with emoji. No JSON visible. Make it easy to scan and compare.
