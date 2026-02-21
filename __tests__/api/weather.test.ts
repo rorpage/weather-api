@@ -146,6 +146,7 @@ describe('weather endpoint', () => {
         icon: '23°',
         message: 'Today: High 28°, low 18°, partly cloudy',
         title: '23° and scattered clouds. Feels like 20°.',
+        temperature: 23,
       });
     });
 
@@ -182,6 +183,7 @@ describe('weather endpoint', () => {
         icon: '23°',
         message: 'Today: High 29°, low 17°, partly cloudy',
         title: '23° and scattered clouds. Feels like 20°.',
+        temperature: 23,
       });
     });
 

@@ -185,6 +185,22 @@ curl -H "x-api-token: your_token_here" \
   "http://localhost:3000/api/weather?lat=40.7128&lon=-74.0060&units=imperial"
 ```
 
+**Response:**
+
+```json
+{
+  "icon": "23°",
+  "message": "Today: High 28°, low 18°, partly cloudy",
+  "title": "23° and scattered clouds. Feels like 20°.",
+  "temperature": 23
+}
+```
+
+- `icon` (string): Temperature with degree symbol for display
+- `message` (string): Today's forecast with high, low, and conditions
+- `title` (string): Current conditions summary with feels-like temperature
+- `temperature` (number): Current temperature as an integer (rounded)
+
 ### METAR Endpoint
 
 **Endpoint:** `/api/metar`

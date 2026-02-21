@@ -41,6 +41,7 @@ class WeatherEndpoint extends ApiEndpoint {
       icon: `${temperature}°`,
       message,
       title,
+      temperature,
     };
   }
 }
