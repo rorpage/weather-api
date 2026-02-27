@@ -1,7 +1,7 @@
 ---
 name: compare-weather
 description: Compare current weather conditions across multiple airports side-by-side. Useful for travel planning or choosing between destinations.
-argument-hint: "[airport1] [airport2] [airport3...] [units]"
+argument-hint: '[airport1] [airport2] [airport3...] [units]'
 allowed-tools: Bash
 ---
 
@@ -31,11 +31,12 @@ weather=$(curl -s -H "x-api-token: ${API_TOKEN}" "http://localhost:3000/api/weat
 Create a markdown table:
 
 | Airport | Temperature | Conditions | Flight Category | Wind | Visibility |
-|---------|-------------|------------|----------------|------|------------|
+| ------- | ----------- | ---------- | --------------- | ---- | ---------- |
 
 ### Step 4: Detailed Analysis
 
 For each airport, show:
+
 - Current conditions summary
 - Forecast for today
 - Key metrics

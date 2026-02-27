@@ -222,6 +222,58 @@ curl -H "x-api-token: your_token_here" \
   "http://localhost:3000/api/metar?id=KJFK"
 ```
 
+### NWS Hourly Forecast Endpoint
+
+**Endpoint:** `/api/nws-forecast`
+
+**Method:** `GET`
+
+**Headers:**
+
+- `x-api-token` (required): API token for authentication
+
+**Query Parameters:**
+
+- `lat` (required): Latitude coordinate (US locations only)
+- `lon` (required): Longitude coordinate (US locations only)
+
+**Example Request:**
+
+```bash
+curl -H "x-api-token: your_token_here" \
+  "http://localhost:3000/api/nws-forecast?lat=39.7684&lon=-86.1581"
+```
+
+**Response:**
+
+```json
+{
+  "generated_at": "2026-02-27T12:00:00+00:00",
+  "start_time": "2026-02-27T12:00:00-05:00",
+  "is_daytime": true,
+  "temperature": 45,
+  "temperature_unit": "F",
+  "wind_speed": "10 mph",
+  "wind_direction": "NW",
+  "short_forecast": "Mostly Cloudy",
+  "probability_of_precipitation": 20,
+  "relative_humidity": 65
+}
+```
+
+- `generated_at` (string): ISO 8601 timestamp when the forecast was generated
+- `start_time` (string): ISO 8601 start time for the current period
+- `is_daytime` (boolean): Whether this is a daytime period
+- `temperature` (number): Temperature as an integer
+- `temperature_unit` (string): `"F"` for Fahrenheit
+- `wind_speed` (string): Wind speed (e.g., `"10 mph"`)
+- `wind_direction` (string): Cardinal wind direction (e.g., `"NW"`)
+- `short_forecast` (string): Brief condition summary (e.g., `"Partly Cloudy"`)
+- `probability_of_precipitation` (number | null): Precipitation chance (0–100)
+- `relative_humidity` (number | null): Relative humidity (0–100)
+
+> **Note:** This endpoint uses the [National Weather Service API](https://api.weather.gov) which only covers US locations. No API key required — NWS data is free and public.
+
 ## Deployment
 
 Deploy to Vercel:

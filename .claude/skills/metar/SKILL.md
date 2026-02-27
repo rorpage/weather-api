@@ -1,7 +1,7 @@
 ---
 name: metar
 description: Get METAR aviation weather data for an airport. Use when you need flight category, visibility, wind, temperature, or raw METAR information.
-argument-hint: "[airport_id]"
+argument-hint: '[airport_id]'
 allowed-tools: Bash
 ---
 
@@ -14,6 +14,7 @@ Get METAR aviation weather data for airport **${0:-KUMP}**.
 **IMPORTANT: Do NOT show raw JSON or curl commands in your response. Only show the final formatted markdown output.**
 
 1. Silently fetch the METAR data:
+
    ```bash
    data=$(curl -s -H "x-api-token: ${API_TOKEN}" "http://localhost:3000/api/metar?id=${0:-KUMP}")
    ```

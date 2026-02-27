@@ -1,7 +1,7 @@
 ---
 name: weather
 description: Get current weather and forecast for any location by coordinates. Use when you need temperature, conditions, or forecast data.
-argument-hint: "[latitude] [longitude] [units]"
+argument-hint: '[latitude] [longitude] [units]'
 allowed-tools: Bash
 ---
 
@@ -14,6 +14,7 @@ Get current weather and today's forecast for coordinates **$0** (latitude) and *
 **IMPORTANT: Do NOT show raw JSON or curl commands in your response. Only show the final formatted markdown output.**
 
 1. Silently fetch the weather data:
+
    ```bash
    data=$(curl -s -H "x-api-token: ${API_TOKEN}" "http://localhost:3000/api/weather?lat=$0&lon=$1&units=${2:-metric}")
    ```

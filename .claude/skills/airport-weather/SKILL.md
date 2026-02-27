@@ -1,7 +1,7 @@
 ---
 name: airport-weather
 description: Get comprehensive weather briefing for an airport combining both METAR aviation data and civilian weather forecast.
-argument-hint: "[airport_id] [units]"
+argument-hint: '[airport_id] [units]'
 allowed-tools: Bash
 ---
 
@@ -34,17 +34,20 @@ weather=$(curl -s -H "x-api-token: ${API_TOKEN}" "http://localhost:3000/api/weat
 Format in two sections:
 
 **🛩️ Aviation Weather (METAR)**
+
 - Flight category and explanation
 - Current conditions (temp, dewpoint, wind)
 - Visibility and sky conditions
 - Altimeter, raw METAR
 
 **🌤️ General Weather & Forecast**
+
 - Current conditions and feels like
 - Today's high and low
 - Forecast description
 
 **✈️ Flight Recommendation**
+
 - Summary of flying conditions
 
 ## Example Output Style

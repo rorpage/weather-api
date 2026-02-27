@@ -231,6 +231,23 @@ cp .env.example .env.local
 # Edit .env.local with actual values
 ```
 
+## Agent Workflow Requirements
+
+After **any** code addition or modification, always do the following automatically — do not ask, do not skip:
+
+1. **Run `npm run format`** to auto-fix formatting
+2. **Run `npm run check`** to verify formatting, linting, type-checking, and tests all pass
+   - If linting or type errors remain, fix them before proceeding
+3. **Update `README.md`** — add or revise documentation for any new or changed endpoints, parameters, or response fields
+4. **Update `.claude/skills/*.SKILL.md`** — if the change affects an endpoint used by a skill, update the skill's description or output format accordingly
+
+## Naming Conventions
+
+- **API response fields** (output interfaces — `*Output.ts` files): use **snake_case** for all multi-word property names (e.g., `start_time`, `wind_speed`, `is_daytime`)
+- **TypeScript internal code** (variables, function parameters, class properties, method names): use standard **camelCase**
+- **External API response types** (`*Response.ts` files that mirror a third-party API): mirror the naming of that API as-is, do not rename to match our convention
+- When adding new output fields, always use snake_case regardless of what the upstream API uses
+
 ## Key Design Decisions
 
 - **No build step**: Vercel compiles TypeScript automatically during dev and deployment
