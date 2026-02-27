@@ -18,20 +18,20 @@ const mockPeriod: NWSForecastPeriodRaw = {
 };
 
 describe('formatTime', () => {
-  it('should extract HH:MM from an ISO datetime string', () => {
-    expect(formatTime('2026-02-27T12:00:00-05:00')).toBe('12:00');
+  it('should format noon as 12:00 PM', () => {
+    expect(formatTime('2026-02-27T12:00:00-05:00')).toBe('12:00 PM');
   });
 
-  it('should preserve leading zeros', () => {
-    expect(formatTime('2026-02-27T08:30:00-05:00')).toBe('08:30');
+  it('should format morning hours as AM with leading zero', () => {
+    expect(formatTime('2026-02-27T08:30:00-05:00')).toBe('08:30 AM');
   });
 
-  it('should handle midnight', () => {
-    expect(formatTime('2026-02-27T00:00:00-05:00')).toBe('00:00');
+  it('should format midnight as 12:00 AM', () => {
+    expect(formatTime('2026-02-27T00:00:00-05:00')).toBe('12:00 AM');
   });
 
-  it('should work with EDT offset (-04:00)', () => {
-    expect(formatTime('2026-07-15T14:00:00-04:00')).toBe('14:00');
+  it('should format afternoon hours as PM with 12-hour conversion', () => {
+    expect(formatTime('2026-07-15T14:00:00-04:00')).toBe('02:00 PM');
   });
 
   it('should return the original string if no time component is found', () => {
@@ -69,7 +69,7 @@ describe('formatPeriod', () => {
   it('should map a raw period to the output format', () => {
     expect(formatPeriod(mockPeriod)).toEqual({
       start_time: '2026-02-27T12:00:00-05:00',
-      start_time_formatted_time: '12:00',
+      start_time_formatted_time: '12:00 PM',
       start_time_formatted_datetime: '02/27/2026 12:00 PM',
       is_daytime: true,
       temperature: 45,
@@ -108,11 +108,11 @@ describe('formatPeriod', () => {
     );
   });
 
-  it('should set start_time_formatted_time as HH:MM', () => {
+  it('should set start_time_formatted_time as hh:mm AM/PM', () => {
     expect(
       formatPeriod({ ...mockPeriod, startTime: '2026-02-27T08:30:00-05:00' })
         .start_time_formatted_time
-    ).toBe('08:30');
+    ).toBe('08:30 AM');
   });
 
   it('should set start_time_formatted_datetime as MM/DD/YYYY HH:MM AM/PM', () => {

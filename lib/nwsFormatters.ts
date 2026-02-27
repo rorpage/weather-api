@@ -2,13 +2,22 @@ import type { NWSForecastPeriodRaw } from '../models/nws/NWSForecastResponse';
 import type { NWSHourlyPeriod } from '../models/nws/NWSForecastOutput';
 
 /**
- * Extracts the local HH:MM time from an ISO 8601 datetime string.
+ * Formats the local time from an ISO 8601 datetime string as hh:mm AM/PM.
  * The time component of the NWS API response is already in local time.
  */
 export function formatTime(isoString: string): string {
-  const match = isoString.match(/T(\d{2}:\d{2})/);
+  const match = isoString.match(/T(\d{2}):(\d{2})/);
 
-  return match ? match[1] : isoString;
+  if (!match) {
+    return isoString;
+  }
+
+  const hour = parseInt(match[1], 10);
+  const minute = match[2];
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const hour12 = hour % 12 || 12;
+
+  return `${String(hour12).padStart(2, '0')}:${minute} ${ampm}`;
 }
 
 /**

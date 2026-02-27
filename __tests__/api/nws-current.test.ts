@@ -94,7 +94,7 @@ describe('nws-current endpoint', () => {
       expect(response.status).toHaveBeenCalledWith(200);
       expect(response.json).toHaveBeenCalledWith({
         start_time: '2026-02-27T12:00:00-05:00',
-        start_time_formatted_time: '12:00',
+        start_time_formatted_time: '12:00 PM',
         start_time_formatted_datetime: '02/27/2026 12:00 PM',
         is_daytime: true,
         temperature: 45,

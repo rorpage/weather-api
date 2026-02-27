@@ -96,7 +96,7 @@ describe('nws-forecast endpoint', () => {
         periods: [
           {
             start_time: '2026-02-27T12:00:00-05:00',
-            start_time_formatted_time: '12:00',
+            start_time_formatted_time: '12:00 PM',
             start_time_formatted_datetime: '02/27/2026 12:00 PM',
             is_daytime: true,
             temperature: 45,
@@ -109,7 +109,7 @@ describe('nws-forecast endpoint', () => {
           },
           {
             start_time: '2026-02-27T13:00:00-05:00',
-            start_time_formatted_time: '13:00',
+            start_time_formatted_time: '01:00 PM',
             start_time_formatted_datetime: '02/27/2026 01:00 PM',
             is_daytime: true,
             temperature: 47,

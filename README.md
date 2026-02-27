@@ -263,7 +263,7 @@ curl -H "x-api-token: your_token_here" \
 ```
 
 - `start_time` (string): Full ISO 8601 timestamp of the period start (e.g., `"2026-02-27T12:00:00-05:00"`)
-- `start_time_formatted_time` (string): Local time of the period in `HH:MM` 24-hour format
+- `start_time_formatted_time` (string): Local time of the period in `hh:mm AM/PM` 12-hour format
 - `start_time_formatted_datetime` (string): Local date and time formatted as `MM/DD/YYYY HH:MM AM/PM`
 - `is_daytime` (boolean): Whether this is a daytime period
 - `temperature` (number): Temperature as an integer
@@ -320,7 +320,7 @@ curl -H "x-api-token: your_token_here" \
 
 - `periods` (array): Up to 12 hourly forecast periods, each with:
   - `start_time` (string): Full ISO 8601 timestamp of the period start
-  - `start_time_formatted_time` (string): Local time of the period in `HH:MM` 24-hour format
+  - `start_time_formatted_time` (string): Local time of the period in `hh:mm AM/PM` 12-hour format
   - `start_time_formatted_datetime` (string): Local date and time formatted as `MM/DD/YYYY HH:MM AM/PM`
   - `is_daytime` (boolean): Whether this is a daytime period
   - `temperature` (number): Temperature as an integer
