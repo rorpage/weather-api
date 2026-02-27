@@ -70,7 +70,7 @@ All API endpoints extend the abstract `ApiEndpoint` class (lib/ApiEndpoint.ts), 
 Each endpoint must implement:
 
 1. `getRequiredParams()`: Returns array of required query parameter names
-2. `process(req)`: Contains endpoint-specific logic, returns the response data
+2. `process(request)`: Contains endpoint-specific logic, returns the response data
 
 **Example endpoint structure:**
 
@@ -87,16 +87,17 @@ class MyEndpoint extends ApiEndpoint {
     return ['param1', 'param2']; // or [] if no params required
   }
 
-  protected async process(req: VercelRequest): Promise<MyOutput> {
-    const { param1, param2 } = req.query;
+  protected async process(request: VercelRequest): Promise<MyOutput> {
+    const { param1, param2 } = request.query;
     const data = await this.service.fetchData(param1, param2);
+
     return { formatted: data };
   }
 }
 
 const endpoint = new MyEndpoint();
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  return endpoint.handle(req, res);
+export default async function handler(request: VercelRequest, response: VercelResponse) {
+  return endpoint.handle(request, response);
 }
 ```
 
@@ -239,7 +240,7 @@ After **any** code addition or modification, always do the following automatical
 2. **Run `npm run check`** to verify formatting, linting, type-checking, and tests all pass
    - If linting or type errors remain, fix them before proceeding
 3. **Update `README.md`** — add or revise documentation for any new or changed endpoints, parameters, or response fields
-4. **Update `.claude/skills/*.SKILL.md`** — if the change affects an endpoint used by a skill, update the skill's description or output format accordingly
+4. **Update `.claude/skills/*/SKILL.md`** — if the change affects an endpoint used by a skill, update the skill's description or output format accordingly
 
 ## Naming Conventions
 
@@ -247,6 +248,7 @@ After **any** code addition or modification, always do the following automatical
 - **TypeScript internal code** (variables, function parameters, class properties, method names): use standard **camelCase**
 - **External API response types** (`*Response.ts` files that mirror a third-party API): mirror the naming of that API as-is, do not rename to match our convention
 - When adding new output fields, always use snake_case regardless of what the upstream API uses
+- **No abbreviations**: always use full, descriptive names — `request` not `req`, `response` not `res`, `latitude` not `lat`, `longitude` not `lon`, `parameter` not `param`, etc.
 
 ## Key Design Decisions
 

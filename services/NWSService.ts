@@ -5,34 +5,37 @@ export class NWSService {
   private readonly userAgent = 'weather-api';
 
   async getHourlyForecast(
-    lat: string | string[],
-    lon: string | string[]
+    latitude: string | string[],
+    longitude: string | string[]
   ): Promise<NWSForecastResponse> {
-    const latStr = Array.isArray(lat) ? lat[0] : lat;
-    const lonStr = Array.isArray(lon) ? lon[0] : lon;
+    const latitudeValue = Array.isArray(latitude) ? latitude[0] : latitude;
+    const longitudeValue = Array.isArray(longitude) ? longitude[0] : longitude;
 
-    // Step 1: Resolve lat/lon to NWS grid point
-    const pointsRes = await fetch(`https://api.weather.gov/points/${latStr},${lonStr}`, {
-      headers: { 'User-Agent': this.userAgent },
-    });
+    // Step 1: Resolve latitude/longitude to NWS grid point
+    const pointsResponse = await fetch(
+      `https://api.weather.gov/points/${latitudeValue},${longitudeValue}`,
+      {
+        headers: { 'User-Agent': this.userAgent },
+      }
+    );
 
-    if (!pointsRes.ok) {
-      throw new Error(`NWS API error getting grid point: ${pointsRes.status}`);
+    if (!pointsResponse.ok) {
+      throw new Error(`NWS API error getting grid point: ${pointsResponse.status}`);
     }
 
-    const pointsData = (await pointsRes.json()) as NWSPointsResponse;
+    const pointsData = (await pointsResponse.json()) as NWSPointsResponse;
     const { gridId, gridX, gridY } = pointsData.properties;
 
     // Step 2: Fetch hourly forecast for the resolved grid point
-    const forecastRes = await fetch(
+    const forecastResponse = await fetch(
       `https://api.weather.gov/gridpoints/${gridId}/${gridX},${gridY}/forecast/hourly`,
       { headers: { 'User-Agent': this.userAgent } }
     );
 
-    if (!forecastRes.ok) {
-      throw new Error(`NWS API error getting hourly forecast: ${forecastRes.status}`);
+    if (!forecastResponse.ok) {
+      throw new Error(`NWS API error getting hourly forecast: ${forecastResponse.status}`);
     }
 
-    return (await forecastRes.json()) as NWSForecastResponse;
+    return (await forecastResponse.json()) as NWSForecastResponse;
   }
 }

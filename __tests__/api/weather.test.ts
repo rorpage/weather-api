@@ -34,11 +34,12 @@ function createMockRequest(overrides: Partial<VercelRequest> = {}): VercelReques
 }
 
 function createMockResponse(): VercelResponse {
-  const res = {
+  const response = {
     status: vi.fn().mockReturnThis(),
     json: vi.fn().mockReturnThis(),
   };
-  return res as unknown as VercelResponse;
+
+  return response as unknown as VercelResponse;
 }
 
 describe('weather endpoint', () => {
@@ -134,15 +135,15 @@ describe('weather endpoint', () => {
     it('should return formatted weather data', async () => {
       mockGetCurrentWeather.mockResolvedValue(mockWeatherResponse);
 
-      const req = createMockRequest({
+      const request = createMockRequest({
         query: { lat: '40.7128', lon: '-74.006' },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(response.status).toHaveBeenCalledWith(200);
+      expect(response.json).toHaveBeenCalledWith({
         icon: '23°',
         message: 'Today: High 28°, low 18°, partly cloudy',
         title: '23° and scattered clouds. Feels like 20°.',
@@ -172,14 +173,14 @@ describe('weather endpoint', () => {
 
       mockGetCurrentWeather.mockResolvedValue(responseWithDecimals);
 
-      const req = createMockRequest({
+      const request = createMockRequest({
         query: { lat: '40.7', lon: '-74.0' },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.json).toHaveBeenCalledWith({
+      expect(response.json).toHaveBeenCalledWith({
         icon: '23°',
         message: 'Today: High 29°, low 17°, partly cloudy',
         title: '23° and scattered clouds. Feels like 20°.',
@@ -190,26 +191,26 @@ describe('weather endpoint', () => {
     it('should handle imperial units', async () => {
       mockGetCurrentWeather.mockResolvedValue(mockWeatherResponse);
 
-      const req = createMockRequest({
+      const request = createMockRequest({
         query: { lat: '40.7', lon: '-74.0', units: 'imperial' },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
       expect(mockGetCurrentWeather).toHaveBeenCalledWith('40.7', '-74.0', 'imperial');
-      expect(res.status).toHaveBeenCalledWith(200);
+      expect(response.status).toHaveBeenCalledWith(200);
     });
 
     it('should default to metric units when not specified', async () => {
       mockGetCurrentWeather.mockResolvedValue(mockWeatherResponse);
 
-      const req = createMockRequest({
+      const request = createMockRequest({
         query: { lat: '40.7', lon: '-74.0' },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
       expect(mockGetCurrentWeather).toHaveBeenCalledWith('40.7', '-74.0', 'metric');
     });
@@ -217,70 +218,70 @@ describe('weather endpoint', () => {
 
   describe('validation errors', () => {
     it('should reject requests without lat parameter', async () => {
-      const req = createMockRequest({
+      const request = createMockRequest({
         query: { lon: '-74.0' },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(response.status).toHaveBeenCalledWith(400);
+      expect(response.json).toHaveBeenCalledWith({
         error: 'Missing required parameters: lat',
       });
     });
 
     it('should reject requests without lon parameter', async () => {
-      const req = createMockRequest({
+      const request = createMockRequest({
         query: { lat: '40.7' },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(response.status).toHaveBeenCalledWith(400);
+      expect(response.json).toHaveBeenCalledWith({
         error: 'Missing required parameters: lon',
       });
     });
 
     it('should reject requests without both parameters', async () => {
-      const req = createMockRequest({ query: {} });
-      const res = createMockResponse();
+      const request = createMockRequest({ query: {} });
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(response.status).toHaveBeenCalledWith(400);
+      expect(response.json).toHaveBeenCalledWith({
         error: 'Missing required parameters: lat, lon',
       });
     });
 
     it('should reject POST requests', async () => {
-      const req = createMockRequest({
+      const request = createMockRequest({
         method: 'POST',
         query: { lat: '40.7', lon: '-74.0' },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.status).toHaveBeenCalledWith(405);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(response.status).toHaveBeenCalledWith(405);
+      expect(response.json).toHaveBeenCalledWith({
         error: 'Method not allowed',
       });
     });
 
     it('should reject requests with invalid token', async () => {
-      const req = createMockRequest({
+      const request = createMockRequest({
         headers: { 'x-api-token': 'wrong-token' },
         query: { lat: '40.7', lon: '-74.0' },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.status).toHaveBeenCalledWith(401);
+      expect(response.status).toHaveBeenCalledWith(401);
     });
   });
 
@@ -288,17 +289,17 @@ describe('weather endpoint', () => {
     it('should handle service errors', async () => {
       mockGetCurrentWeather.mockRejectedValue(new Error('OpenWeatherMap API error'));
 
-      const req = createMockRequest({
+      const request = createMockRequest({
         query: { lat: '40.7', lon: '-74.0' },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(response.status).toHaveBeenCalledWith(500);
+      expect(response.json).toHaveBeenCalledWith({
         error: 'Internal server error',
         message: 'OpenWeatherMap API error',
       });

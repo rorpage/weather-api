@@ -14,7 +14,7 @@ vi.mock('../../services/NWSService', () => {
   };
 });
 
-import handler from '../../api/nws-forecast';
+import handler from '../../api/nws-current';
 
 function createMockRequest(overrides: Partial<VercelRequest> = {}): VercelRequest {
   return {
@@ -22,7 +22,7 @@ function createMockRequest(overrides: Partial<VercelRequest> = {}): VercelReques
     headers: { 'x-api-token': 'test-token' },
     query: {},
     body: undefined,
-    url: '/api/nws-forecast',
+    url: '/api/nws-current',
     ...overrides,
   } as VercelRequest;
 }
@@ -33,7 +33,7 @@ function createMockResponse(): VercelResponse {
   return response as unknown as VercelResponse;
 }
 
-describe('nws-forecast endpoint', () => {
+describe('nws-current endpoint', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
@@ -83,7 +83,7 @@ describe('nws-forecast endpoint', () => {
   };
 
   describe('successful requests', () => {
-    it('should return a periods array with formatted fields', async () => {
+    it('should return the first period as a flat object with formatted fields', async () => {
       mockGetHourlyForecast.mockResolvedValue(mockForecastResponse);
 
       const request = createMockRequest({ query: { lat: '39.7684', lon: '-86.1581' } });
@@ -93,66 +93,34 @@ describe('nws-forecast endpoint', () => {
 
       expect(response.status).toHaveBeenCalledWith(200);
       expect(response.json).toHaveBeenCalledWith({
-        periods: [
-          {
-            start_time: '2026-02-27T12:00:00-05:00',
-            start_time_formatted_time: '12:00',
-            start_time_formatted_datetime: '02/27/2026 12:00 PM',
-            is_daytime: true,
-            temperature: 45,
-            temperature_unit: 'F',
-            wind_speed: '10 mph',
-            wind_direction: 'NW',
-            short_forecast: 'Mostly cloudy',
-            probability_of_precipitation: 20,
-            relative_humidity: 65,
-          },
-          {
-            start_time: '2026-02-27T13:00:00-05:00',
-            start_time_formatted_time: '13:00',
-            start_time_formatted_datetime: '02/27/2026 01:00 PM',
-            is_daytime: true,
-            temperature: 47,
-            temperature_unit: 'F',
-            wind_speed: '12 mph',
-            wind_direction: 'W',
-            short_forecast: 'Partly cloudy',
-            probability_of_precipitation: null,
-            relative_humidity: 60,
-          },
-        ],
+        start_time: '2026-02-27T12:00:00-05:00',
+        start_time_formatted_time: '12:00',
+        start_time_formatted_datetime: '02/27/2026 12:00 PM',
+        is_daytime: true,
+        temperature: 45,
+        temperature_unit: 'F',
+        wind_speed: '10 mph',
+        wind_direction: 'NW',
+        short_forecast: 'Mostly cloudy',
+        probability_of_precipitation: 20,
+        relative_humidity: 65,
       });
     });
 
-    it('should limit response to 12 periods', async () => {
-      const manyPeriods = Array.from({ length: 20 }, (_, index) => ({
-        number: index + 1,
-        startTime: `2026-02-27T${String(index).padStart(2, '0')}:00:00-05:00`,
-        endTime: `2026-02-27T${String(index + 1).padStart(2, '0')}:00:00-05:00`,
-        isDaytime: index >= 6 && index < 20,
-        temperature: 40 + index,
-        temperatureUnit: 'F',
-        windSpeed: '10 mph',
-        windDirection: 'N',
-        shortForecast: 'Clear',
-        probabilityOfPrecipitation: { value: 0, unitCode: 'wmoUnit:percent' },
-        relativeHumidity: { value: 50, unitCode: 'wmoUnit:percent' },
-        dewpoint: { value: 30, unitCode: 'wmoUnit:degF' },
-      }));
-
-      mockGetHourlyForecast.mockResolvedValue({
-        properties: { generatedAt: '2026-02-27T12:00:00+00:00', periods: manyPeriods },
-      });
+    it('should return only the first period when multiple are available', async () => {
+      mockGetHourlyForecast.mockResolvedValue(mockForecastResponse);
 
       const request = createMockRequest({ query: { lat: '39.7684', lon: '-86.1581' } });
       const response = createMockResponse();
 
       await handler(request, response);
 
-      const result = (response.json as ReturnType<typeof vi.fn>).mock.calls[0][0] as {
-        periods: unknown[];
-      };
-      expect(result.periods).toHaveLength(12);
+      const result = (response.json as ReturnType<typeof vi.fn>).mock.calls[0][0] as Record<
+        string,
+        unknown
+      >;
+      expect(result).not.toHaveProperty('periods');
+      expect(result.start_time).toBe('2026-02-27T12:00:00-05:00');
     });
 
     it('should pass lat and lon to the service', async () => {

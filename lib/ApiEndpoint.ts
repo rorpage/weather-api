@@ -10,41 +10,38 @@ export abstract class ApiEndpoint {
   /**
    * Process the request and return the response data
    */
-  protected abstract process(req: VercelRequest): Promise<unknown>;
+  protected abstract process(request: VercelRequest): Promise<unknown>;
 
   /**
    * Main handler for the endpoint
    */
-  public async handle(req: VercelRequest, res: VercelResponse): Promise<VercelResponse> {
+  public async handle(request: VercelRequest, response: VercelResponse): Promise<VercelResponse> {
     try {
-      // Validate method
-      const methodError = validateMethod(req.method);
+      const methodError = validateMethod(request.method);
       if (methodError) {
-        return res.status(methodError.status).json({ error: methodError.error });
+        return response.status(methodError.status).json({ error: methodError.error });
       }
 
-      // Validate authentication
-      const authError = validateAuth(req.headers);
+      const authError = validateAuth(request.headers);
       if (authError) {
-        return res.status(authError.status).json({ error: authError.error });
+        return response.status(authError.status).json({ error: authError.error });
       }
 
-      // Validate required parameters
       const requiredParams = this.getRequiredParams();
       if (requiredParams.length > 0) {
-        const paramsError = validateParams(req.query, requiredParams);
+        const paramsError = validateParams(request.query, requiredParams);
         if (paramsError) {
-          return res.status(paramsError.status).json({ error: paramsError.error });
+          return response.status(paramsError.status).json({ error: paramsError.error });
         }
       }
 
-      // Process the request
-      const data = await this.process(req);
+      const data = await this.process(request);
 
-      return res.status(200).json(data);
+      return response.status(200).json(data);
     } catch (error) {
       console.error(`Error in ${this.constructor.name}:`, error);
-      return res.status(500).json({
+
+      return response.status(500).json({
         error: 'Internal server error',
         message: error instanceof Error ? error.message : 'Unknown error',
       });

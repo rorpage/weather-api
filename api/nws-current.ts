@@ -2,11 +2,9 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ApiEndpoint } from '../lib/ApiEndpoint';
 import { NWSService } from '../services/NWSService';
 import { formatPeriod } from '../lib/nwsFormatters';
-import type { NWSHourlyForecastOutput } from '../models/nws/NWSForecastOutput';
+import type { NWSCurrentOutput } from '../models/nws/NWSForecastOutput';
 
-const PERIODS_TO_RETURN = 12;
-
-class NWSForecastEndpoint extends ApiEndpoint {
+class NWSCurrentEndpoint extends ApiEndpoint {
   private nwsService: NWSService;
 
   constructor() {
@@ -18,16 +16,15 @@ class NWSForecastEndpoint extends ApiEndpoint {
     return ['lat', 'lon'];
   }
 
-  protected async process(request: VercelRequest): Promise<NWSHourlyForecastOutput> {
+  protected async process(request: VercelRequest): Promise<NWSCurrentOutput> {
     const { lat: latitude, lon: longitude } = request.query;
     const forecastData = await this.nwsService.getHourlyForecast(latitude, longitude);
-    const periods = forecastData.properties.periods.slice(0, PERIODS_TO_RETURN).map(formatPeriod);
 
-    return { periods };
+    return formatPeriod(forecastData.properties.periods[0]);
   }
 }
 
-const endpoint = new NWSForecastEndpoint();
+const endpoint = new NWSCurrentEndpoint();
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
   return endpoint.handle(request, response);

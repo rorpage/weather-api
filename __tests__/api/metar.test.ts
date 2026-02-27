@@ -37,11 +37,12 @@ function createMockRequest(overrides: Partial<VercelRequest> = {}): VercelReques
 }
 
 function createMockResponse(): VercelResponse {
-  const res = {
+  const response = {
     status: vi.fn().mockReturnThis(),
     json: vi.fn().mockReturnThis(),
   };
-  return res as unknown as VercelResponse;
+
+  return response as unknown as VercelResponse;
 }
 
 describe('metar endpoint', () => {
@@ -99,16 +100,16 @@ describe('metar endpoint', () => {
       mockGetAirportInfo.mockResolvedValue(mockAirportResponse);
       mockGetMetar.mockResolvedValue(mockMetarResponse);
 
-      const req = createMockRequest();
-      const res = createMockResponse();
+      const request = createMockRequest();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
       expect(mockGetAirportInfo).toHaveBeenCalledWith('KUMP');
       expect(mockGetMetar).toHaveBeenCalledWith(39.9342, -86.0445);
-      expect(res.status).toHaveBeenCalledWith(200);
+      expect(response.status).toHaveBeenCalledWith(200);
 
-      const jsonCall = (res.json as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      const jsonCall = (response.json as ReturnType<typeof vi.fn>).mock.calls[0][0];
       expect(jsonCall.altimeter).toBe('30.12');
       expect(jsonCall.dewpoint).toBe(2);
       expect(jsonCall.id).toBe('KUMP');
@@ -149,12 +150,12 @@ describe('metar endpoint', () => {
       });
       mockGetMetar.mockResolvedValue(mockMetarResponse);
 
-      const req = createMockRequest({
+      const request = createMockRequest({
         query: { id: 'kjfk' },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
       expect(mockGetAirportInfo).toHaveBeenCalledWith('KJFK');
     });
@@ -163,12 +164,12 @@ describe('metar endpoint', () => {
       mockGetAirportInfo.mockResolvedValue(mockAirportResponse);
       mockGetMetar.mockResolvedValue(mockMetarResponse);
 
-      const req = createMockRequest({
+      const request = createMockRequest({
         query: { id: 'kump' },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
       expect(mockGetAirportInfo).toHaveBeenCalledWith('KUMP');
     });
@@ -182,12 +183,12 @@ describe('metar endpoint', () => {
         },
       });
 
-      const req = createMockRequest();
-      const res = createMockResponse();
+      const request = createMockRequest();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.json).toHaveBeenCalledWith(
+      expect(response.json).toHaveBeenCalledWith(
         expect.objectContaining({
           sky_conditions: [
             {
@@ -209,12 +210,12 @@ describe('metar endpoint', () => {
         },
       });
 
-      const req = createMockRequest();
-      const res = createMockResponse();
+      const request = createMockRequest();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.json).toHaveBeenCalledWith(
+      expect(response.json).toHaveBeenCalledWith(
         expect.objectContaining({
           sky_conditions: [
             {
@@ -236,12 +237,12 @@ describe('metar endpoint', () => {
         },
       });
 
-      const req = createMockRequest();
-      const res = createMockResponse();
+      const request = createMockRequest();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.json).toHaveBeenCalledWith(
+      expect(response.json).toHaveBeenCalledWith(
         expect.objectContaining({
           sky_conditions: [
             {
@@ -263,12 +264,12 @@ describe('metar endpoint', () => {
         },
       });
 
-      const req = createMockRequest();
-      const res = createMockResponse();
+      const request = createMockRequest();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.json).toHaveBeenCalledWith(
+      expect(response.json).toHaveBeenCalledWith(
         expect.objectContaining({
           sky_conditions: [
             {
@@ -291,12 +292,12 @@ describe('metar endpoint', () => {
         },
       });
 
-      const req = createMockRequest();
-      const res = createMockResponse();
+      const request = createMockRequest();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.json).toHaveBeenCalledWith(
+      expect(response.json).toHaveBeenCalledWith(
         expect.objectContaining({
           wind: {
             description: 'Wind calm',
@@ -320,12 +321,12 @@ describe('metar endpoint', () => {
         },
       });
 
-      const req = createMockRequest();
-      const res = createMockResponse();
+      const request = createMockRequest();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.json).toHaveBeenCalledWith(
+      expect(response.json).toHaveBeenCalledWith(
         expect.objectContaining({
           sky_conditions: [
             { base: 1500, cover: 'FEW', description: 'Few at 1500ft' },
@@ -345,12 +346,12 @@ describe('metar endpoint', () => {
         },
       });
 
-      const req = createMockRequest();
-      const res = createMockResponse();
+      const request = createMockRequest();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      const jsonCall = (res.json as ReturnType<typeof vi.fn>).mock.calls[0][0] as {
+      const jsonCall = (response.json as ReturnType<typeof vi.fn>).mock.calls[0][0] as {
         observation_time: string;
       };
       expect(jsonCall.observation_time).toMatch(/^\d{2}:\d{2} L$/);
@@ -359,26 +360,26 @@ describe('metar endpoint', () => {
 
   describe('validation errors', () => {
     it('should reject POST requests', async () => {
-      const req = createMockRequest({ method: 'POST' });
-      const res = createMockResponse();
+      const request = createMockRequest({ method: 'POST' });
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.status).toHaveBeenCalledWith(405);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(response.status).toHaveBeenCalledWith(405);
+      expect(response.json).toHaveBeenCalledWith({
         error: 'Method not allowed',
       });
     });
 
     it('should reject requests with invalid token', async () => {
-      const req = createMockRequest({
+      const request = createMockRequest({
         headers: { 'x-api-token': 'wrong-token' },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.status).toHaveBeenCalledWith(401);
+      expect(response.status).toHaveBeenCalledWith(401);
     });
   });
 
@@ -395,17 +396,17 @@ describe('metar endpoint', () => {
         },
       });
 
-      const req = createMockRequest({
+      const request = createMockRequest({
         query: { id: 'TEST' },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(response.status).toHaveBeenCalledWith(500);
+      expect(response.json).toHaveBeenCalledWith({
         error: 'Internal server error',
         message: 'Airport coordinates not found for TEST',
       });
@@ -416,17 +417,17 @@ describe('metar endpoint', () => {
     it('should handle airport service errors', async () => {
       mockGetAirportInfo.mockRejectedValue(new Error('Airport not found'));
 
-      const req = createMockRequest({
+      const request = createMockRequest({
         query: { id: 'INVALID' },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(response.status).toHaveBeenCalledWith(500);
+      expect(response.json).toHaveBeenCalledWith({
         error: 'Internal server error',
         message: 'Airport not found',
       });
@@ -438,15 +439,15 @@ describe('metar endpoint', () => {
       mockGetAirportInfo.mockResolvedValue(mockAirportResponse);
       mockGetMetar.mockRejectedValue(new Error('METAR data unavailable'));
 
-      const req = createMockRequest();
-      const res = createMockResponse();
+      const request = createMockRequest();
+      const response = createMockResponse();
 
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      await handler(req, res);
+      await handler(request, response);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(response.status).toHaveBeenCalledWith(500);
+      expect(response.json).toHaveBeenCalledWith({
         error: 'Internal server error',
         message: 'METAR data unavailable',
       });
@@ -458,15 +459,15 @@ describe('metar endpoint', () => {
       mockGetAirportInfo.mockResolvedValue(mockAirportResponse);
       mockGetMetar.mockResolvedValue(mockMetarResponse);
 
-      const req = createMockRequest({
+      const request = createMockRequest({
         query: { id: ['kump', 'other'] },
       });
-      const res = createMockResponse();
+      const response = createMockResponse();
 
-      await handler(req, res);
+      await handler(request, response);
 
       expect(mockGetAirportInfo).toHaveBeenCalledWith('KUMP');
-      expect(res.status).toHaveBeenCalledWith(200);
+      expect(response.status).toHaveBeenCalledWith(200);
     });
   });
 });

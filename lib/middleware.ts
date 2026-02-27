@@ -8,6 +8,7 @@ export function validateMethod(method: string | undefined): ValidationError | nu
   if (method !== 'GET') {
     return { status: 405, error: 'Method not allowed' };
   }
+
   return null;
 }
 
@@ -42,7 +43,7 @@ export function validateParams(
   query: { [key: string]: string | string[] | undefined },
   requiredParams: string[]
 ): ValidationError | null {
-  const missing = requiredParams.filter((param) => !query[param]);
+  const missing = requiredParams.filter((parameter) => !query[parameter]);
 
   if (missing.length > 0) {
     return {

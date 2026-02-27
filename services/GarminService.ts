@@ -20,10 +20,10 @@ export class GarminService {
   /**
    * Fetch METAR data from Garmin API using coordinates
    */
-  async getMetar(lat: number, lon: number): Promise<MetarResponse> {
+  async getMetar(latitude: number, longitude: number): Promise<MetarResponse> {
     const url = new URL('https://pilotweb.garmin.com/api/v1/wx/metar');
-    url.searchParams.set('lat', lat.toString());
-    url.searchParams.set('lon', lon.toString());
+    url.searchParams.set('lat', latitude.toString());
+    url.searchParams.set('lon', longitude.toString());
 
     const response = await fetch(url.toString());
 

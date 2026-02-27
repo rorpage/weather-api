@@ -15,22 +15,23 @@ class WeatherEndpoint extends ApiEndpoint {
     return ['lat', 'lon'];
   }
 
-  protected async process(req: VercelRequest): Promise<WeatherOutput> {
-    const { lat, lon, units = 'metric' } = req.query;
+  protected async process(request: VercelRequest): Promise<WeatherOutput> {
+    const { lat: latitude, lon: longitude, units = 'metric' } = request.query;
 
-    // Fetch weather data from OpenWeatherMap
-    const weatherData = await this.weatherService.getCurrentWeather(lat, lon, units as string);
+    const weatherData = await this.weatherService.getCurrentWeather(
+      latitude,
+      longitude,
+      units as string
+    );
 
-    // Format the response
     const current = weatherData.current;
     const weather = weatherData.current.weather[0];
 
     const temperature = Math.round(current.temp);
-    const feels_like = Math.round(current.feels_like);
+    const feelsLike = Math.round(current.feels_like);
 
-    const title = `${temperature}° and ${weather.description}. Feels like ${feels_like}°.`;
+    const title = `${temperature}° and ${weather.description}. Feels like ${feelsLike}°.`;
 
-    // Daily
     const daily = weatherData.daily[0];
     const high = Math.round(daily.temp.max);
     const low = Math.round(daily.temp.min);
@@ -48,6 +49,6 @@ class WeatherEndpoint extends ApiEndpoint {
 
 const endpoint = new WeatherEndpoint();
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  return endpoint.handle(req, res);
+export default async function handler(request: VercelRequest, response: VercelResponse) {
+  return endpoint.handle(request, response);
 }

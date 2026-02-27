@@ -222,6 +222,58 @@ curl -H "x-api-token: your_token_here" \
   "http://localhost:3000/api/metar?id=KJFK"
 ```
 
+### NWS Current Conditions Endpoint
+
+**Endpoint:** `/api/nws-current`
+
+**Method:** `GET`
+
+**Headers:**
+
+- `x-api-token` (required): API token for authentication
+
+**Query Parameters:**
+
+- `lat` (required): Latitude coordinate (US locations only)
+- `lon` (required): Longitude coordinate (US locations only)
+
+**Example Request:**
+
+```bash
+curl -H "x-api-token: your_token_here" \
+  "http://localhost:3000/api/nws-current?lat=39.7684&lon=-86.1581"
+```
+
+**Response:**
+
+```json
+{
+  "start_time": "2026-02-27T12:00:00-05:00",
+  "start_time_formatted_time": "12:00",
+  "start_time_formatted_datetime": "02/27/2026 12:00 PM",
+  "is_daytime": true,
+  "temperature": 45,
+  "temperature_unit": "F",
+  "wind_speed": "10 mph",
+  "wind_direction": "NW",
+  "short_forecast": "Mostly cloudy",
+  "probability_of_precipitation": 20,
+  "relative_humidity": 65
+}
+```
+
+- `start_time` (string): Full ISO 8601 timestamp of the period start (e.g., `"2026-02-27T12:00:00-05:00"`)
+- `start_time_formatted_time` (string): Local time of the period in `HH:MM` 24-hour format
+- `start_time_formatted_datetime` (string): Local date and time formatted as `MM/DD/YYYY HH:MM AM/PM`
+- `is_daytime` (boolean): Whether this is a daytime period
+- `temperature` (number): Temperature as an integer
+- `temperature_unit` (string): `"F"` for Fahrenheit
+- `wind_speed` (string): Wind speed (e.g., `"10 mph"`)
+- `wind_direction` (string): Cardinal wind direction (e.g., `"NW"`)
+- `short_forecast` (string): Brief condition summary (e.g., `"Mostly cloudy"`)
+- `probability_of_precipitation` (number | null): Precipitation chance (0–100)
+- `relative_humidity` (number | null): Relative humidity (0–100)
+
 ### NWS Hourly Forecast Endpoint
 
 **Endpoint:** `/api/nws-forecast`
@@ -248,29 +300,38 @@ curl -H "x-api-token: your_token_here" \
 
 ```json
 {
-  "start_time": "2026-02-27T12:00:00-05:00",
-  "is_daytime": true,
-  "temperature": 45,
-  "temperature_unit": "F",
-  "wind_speed": "10 mph",
-  "wind_direction": "NW",
-  "short_forecast": "Mostly cloudy",
-  "probability_of_precipitation": 20,
-  "relative_humidity": 65
+  "periods": [
+    {
+      "start_time": "2026-02-27T12:00:00-05:00",
+      "start_time_formatted_time": "12:00",
+      "start_time_formatted_datetime": "02/27/2026 12:00 PM",
+      "is_daytime": true,
+      "temperature": 45,
+      "temperature_unit": "F",
+      "wind_speed": "10 mph",
+      "wind_direction": "NW",
+      "short_forecast": "Mostly cloudy",
+      "probability_of_precipitation": 20,
+      "relative_humidity": 65
+    }
+  ]
 }
 ```
 
-- `start_time` (string): ISO 8601 start time for the current period
-- `is_daytime` (boolean): Whether this is a daytime period
-- `temperature` (number): Temperature as an integer
-- `temperature_unit` (string): `"F"` for Fahrenheit
-- `wind_speed` (string): Wind speed (e.g., `"10 mph"`)
-- `wind_direction` (string): Cardinal wind direction (e.g., `"NW"`)
-- `short_forecast` (string): Brief condition summary (e.g., `"Partly Cloudy"`)
-- `probability_of_precipitation` (number | null): Precipitation chance (0–100)
-- `relative_humidity` (number | null): Relative humidity (0–100)
+- `periods` (array): Up to 12 hourly forecast periods, each with:
+  - `start_time` (string): Full ISO 8601 timestamp of the period start
+  - `start_time_formatted_time` (string): Local time of the period in `HH:MM` 24-hour format
+  - `start_time_formatted_datetime` (string): Local date and time formatted as `MM/DD/YYYY HH:MM AM/PM`
+  - `is_daytime` (boolean): Whether this is a daytime period
+  - `temperature` (number): Temperature as an integer
+  - `temperature_unit` (string): `"F"` for Fahrenheit
+  - `wind_speed` (string): Wind speed (e.g., `"10 mph"`)
+  - `wind_direction` (string): Cardinal wind direction (e.g., `"NW"`)
+  - `short_forecast` (string): Brief condition summary (e.g., `"Mostly cloudy"`)
+  - `probability_of_precipitation` (number | null): Precipitation chance (0–100)
+  - `relative_humidity` (number | null): Relative humidity (0–100)
 
-> **Note:** This endpoint uses the [National Weather Service API](https://api.weather.gov) which only covers US locations. No API key required — NWS data is free and public.
+> **Note:** Both NWS endpoints use the [National Weather Service API](https://api.weather.gov) which only covers US locations. No API key required — NWS data is free and public.
 
 ## Deployment
 

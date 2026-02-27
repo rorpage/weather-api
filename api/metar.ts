@@ -16,66 +16,59 @@ class MetarEndpoint extends ApiEndpoint {
     return []; // id is optional with default value
   }
 
-  protected async process(req: VercelRequest): Promise<MetarOutput> {
-    const { id = 'KUMP' } = req.query;
+  protected async process(request: VercelRequest): Promise<MetarOutput> {
+    const { id = 'KUMP' } = request.query;
 
-    // Uppercase the airport ID
     const airportId = typeof id === 'string' ? id.toUpperCase() : 'KUMP';
 
-    // Fetch airport information
     const airportData = await this.garminService.getAirportInfo(airportId);
 
-    // Extract coordinates from the airport data
     const airportInfo = airportData?.AirportEntry?.CcAirportInfoList?.[0];
 
     if (!airportInfo || !airportInfo.latDeg || !airportInfo.lonDeg) {
       throw new Error(`Airport coordinates not found for ${airportId}`);
     }
 
-    const lat = airportInfo.latDeg;
-    const lon = airportInfo.lonDeg;
+    const latitude = airportInfo.latDeg;
+    const longitude = airportInfo.lonDeg;
 
-    // Fetch METAR data using coordinates
-    const metarResponseData = await this.garminService.getMetar(lat, lon);
+    const metarResponseData = await this.garminService.getMetar(latitude, longitude);
     const metarData = metarResponseData.metar;
 
-    // Format observation time
-    const observation_time = new Date(metarData.issueTime * 1000);
-    const hours = observation_time.getHours();
-    const hours_display = hours < 10 ? `0${hours}` : hours;
-    const minutes = observation_time.getMinutes();
-    const minutes_display = minutes < 10 ? `0${minutes}` : minutes;
-    const time = `${hours_display}:${minutes_display} L`;
+    const observationTime = new Date(metarData.issueTime * 1000);
+    const hours = observationTime.getHours();
+    const hoursDisplay = hours < 10 ? `0${hours}` : hours;
+    const minutes = observationTime.getMinutes();
+    const minutesDisplay = minutes < 10 ? `0${minutes}` : minutes;
+    const time = `${hoursDisplay}:${minutesDisplay} L`;
 
-    // Format sky conditions
-    const sky_conditions: SkyCondition[] = metarData.CloudLayers.map((sc) => {
-      const base = Math.round(sc.height);
+    const sky_conditions: SkyCondition[] = metarData.CloudLayers.map((cloudLayer) => {
+      const base = Math.round(cloudLayer.height);
 
-      let cover_display = sc.type;
-      if (sc.type === 'SCT') {
-        cover_display = 'Scattered';
-      } else if (sc.type === 'BKN') {
-        cover_display = 'Broken';
-      } else if (sc.type === 'OVC') {
-        cover_display = 'Overcast';
-      } else if (sc.type === 'FEW') {
-        cover_display = 'Few';
+      let coverDisplay = cloudLayer.type;
+      if (cloudLayer.type === 'SCT') {
+        coverDisplay = 'Scattered';
+      } else if (cloudLayer.type === 'BKN') {
+        coverDisplay = 'Broken';
+      } else if (cloudLayer.type === 'OVC') {
+        coverDisplay = 'Overcast';
+      } else if (cloudLayer.type === 'FEW') {
+        coverDisplay = 'Few';
       }
 
-      let description = `${cover_display} at ${base}ft`;
+      let description = `${coverDisplay} at ${base}ft`;
 
-      if (sc.type === 'CLR') {
+      if (cloudLayer.type === 'CLR') {
         description = 'Clear';
       }
 
       return {
         base,
-        cover: sc.type,
+        cover: cloudLayer.type,
         description,
       };
     });
 
-    // Format wind description
     let windDescription = `${metarData.windDir}° at ${metarData.windSpeed} kt`;
 
     if (metarData.windDir === 0 && metarData.windSpeed === 0) {
@@ -103,6 +96,6 @@ class MetarEndpoint extends ApiEndpoint {
 
 const endpoint = new MetarEndpoint();
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  return endpoint.handle(req, res);
+export default async function handler(request: VercelRequest, response: VercelResponse) {
+  return endpoint.handle(request, response);
 }

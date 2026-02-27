@@ -15,16 +15,16 @@ export class OpenWeatherMapService {
    * Fetch current weather data from OpenWeatherMap One Call API 3.0
    */
   async getCurrentWeather(
-    lat: string | string[],
-    lon: string | string[],
+    latitude: string | string[],
+    longitude: string | string[],
     units: string = 'metric'
   ): Promise<WeatherResponse> {
-    const latStr = Array.isArray(lat) ? lat[0] : lat;
-    const lonStr = Array.isArray(lon) ? lon[0] : lon;
+    const latitudeValue = Array.isArray(latitude) ? latitude[0] : latitude;
+    const longitudeValue = Array.isArray(longitude) ? longitude[0] : longitude;
 
     const url = new URL('https://api.openweathermap.org/data/3.0/onecall');
-    url.searchParams.set('lat', latStr);
-    url.searchParams.set('lon', lonStr);
+    url.searchParams.set('lat', latitudeValue);
+    url.searchParams.set('lon', longitudeValue);
     url.searchParams.set('units', units);
     url.searchParams.set('exclude', 'minutely,hourly,alerts');
     url.searchParams.set('appid', this.apiKey);
