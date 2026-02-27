@@ -248,20 +248,18 @@ curl -H "x-api-token: your_token_here" \
 
 ```json
 {
-  "generated_at": "2026-02-27T12:00:00+00:00",
   "start_time": "2026-02-27T12:00:00-05:00",
   "is_daytime": true,
   "temperature": 45,
   "temperature_unit": "F",
   "wind_speed": "10 mph",
   "wind_direction": "NW",
-  "short_forecast": "Mostly Cloudy",
+  "short_forecast": "Mostly cloudy",
   "probability_of_precipitation": 20,
   "relative_humidity": 65
 }
 ```
 
-- `generated_at` (string): ISO 8601 timestamp when the forecast was generated
 - `start_time` (string): ISO 8601 start time for the current period
 - `is_daytime` (boolean): Whether this is a daytime period
 - `temperature` (number): Temperature as an integer

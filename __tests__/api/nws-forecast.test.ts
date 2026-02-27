@@ -103,14 +103,13 @@ describe('nws-forecast endpoint', () => {
 
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        generated_at: '2026-02-27T12:00:00+00:00',
         start_time: '2026-02-27T12:00:00-05:00',
         is_daytime: true,
         temperature: 45,
         temperature_unit: 'F',
         wind_speed: '10 mph',
         wind_direction: 'NW',
-        short_forecast: 'Mostly Cloudy',
+        short_forecast: 'Mostly cloudy',
         probability_of_precipitation: 20,
         relative_humidity: 65,
       });
@@ -129,7 +128,32 @@ describe('nws-forecast endpoint', () => {
         unknown
       >;
       expect(result).not.toHaveProperty('periods');
+      expect(result).not.toHaveProperty('generated_at');
       expect(result.start_time).toBe('2026-02-27T12:00:00-05:00');
+    });
+
+    it('should format short_forecast with only first letter capitalized', async () => {
+      const responseWithUpperForecast: NWSForecastResponse = {
+        properties: {
+          ...mockForecastResponse.properties,
+          periods: [
+            {
+              ...mockForecastResponse.properties.periods[0],
+              shortForecast: 'PARTLY CLOUDY AND WINDY',
+            },
+          ],
+        },
+      };
+      mockGetHourlyForecast.mockResolvedValue(responseWithUpperForecast);
+
+      const req = createMockRequest({ query: { lat: '39.7684', lon: '-86.1581' } });
+      const res = createMockResponse();
+
+      await handler(req, res);
+
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ short_forecast: 'Partly cloudy and windy' })
+      );
     });
 
     it('should pass lat and lon to the service', async () => {

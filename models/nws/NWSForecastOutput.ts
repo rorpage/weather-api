@@ -1,5 +1,4 @@
 export interface NWSForecastOutput {
-  generated_at: string;
   start_time: string;
   is_daytime: boolean;
   temperature: number;

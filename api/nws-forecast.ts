@@ -19,18 +19,17 @@ class NWSForecastEndpoint extends ApiEndpoint {
     const { lat, lon } = req.query;
 
     const forecastData = await this.nwsService.getHourlyForecast(lat, lon);
-    const { generatedAt, periods } = forecastData.properties;
-    const period = periods[0];
+    const period = forecastData.properties.periods[0];
+    const shortForecast = period.shortForecast.toLowerCase();
 
     return {
-      generated_at: generatedAt,
       start_time: period.startTime,
       is_daytime: period.isDaytime,
       temperature: period.temperature,
       temperature_unit: period.temperatureUnit,
       wind_speed: period.windSpeed,
       wind_direction: period.windDirection,
-      short_forecast: period.shortForecast,
+      short_forecast: shortForecast.charAt(0).toUpperCase() + shortForecast.slice(1),
       probability_of_precipitation: period.probabilityOfPrecipitation.value,
       relative_humidity: period.relativeHumidity.value,
     };
