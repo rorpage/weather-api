@@ -39,11 +39,29 @@ export function formatDatetime(isoString: string): string {
   return `${month}/${day}/${year} ${String(hour12).padStart(2, '0')}:${minute} ${ampm}`;
 }
 
+const FORECAST_ABBREVIATIONS: [RegExp, string][] = [
+  [/thunderstorms/gi, 't-storms'],
+  [/thunderstorm/gi, 't-storm'],
+  [/\band\b/gi, '+'],
+  [/scattered/gi, "sct'd"],
+];
+
+/**
+ * Replaces verbose weather terms with common short-form abbreviations.
+ */
+export function abbreviateForecast(forecast: string): string {
+  return FORECAST_ABBREVIATIONS.reduce((result, [pattern, replacement]) => {
+    return result.replace(pattern, replacement);
+  }, forecast);
+}
+
 /**
  * Maps a raw NWS forecast period to the output format shared by both NWS endpoints.
  */
 export function formatPeriod(period: NWSForecastPeriodRaw): NWSHourlyPeriod {
-  const rawForecast = period.shortForecast.toLowerCase();
+  const lowercased = period.shortForecast.toLowerCase();
+  const abbreviated = abbreviateForecast(lowercased);
+  const shortForecast = abbreviated.charAt(0).toUpperCase() + abbreviated.slice(1);
 
   return {
     start_time: period.startTime,
@@ -54,7 +72,7 @@ export function formatPeriod(period: NWSForecastPeriodRaw): NWSHourlyPeriod {
     temperature_unit: period.temperatureUnit,
     wind_speed: period.windSpeed,
     wind_direction: period.windDirection,
-    short_forecast: rawForecast.charAt(0).toUpperCase() + rawForecast.slice(1),
+    short_forecast: shortForecast,
     probability_of_precipitation: period.probabilityOfPrecipitation.value,
     relative_humidity: period.relativeHumidity.value,
   };

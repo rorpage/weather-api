@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { formatTime, formatDatetime, formatPeriod } from '../../lib/nwsFormatters';
+import {
+  formatTime,
+  formatDatetime,
+  formatPeriod,
+  abbreviateForecast,
+} from '../../lib/nwsFormatters';
 import type { NWSForecastPeriodRaw } from '../../models/nws/NWSForecastResponse';
 
 const mockPeriod: NWSForecastPeriodRaw = {
@@ -65,6 +70,32 @@ describe('formatDatetime', () => {
   });
 });
 
+describe('abbreviateForecast', () => {
+  it('should replace thunderstorms with t-storms', () => {
+    expect(abbreviateForecast('showers and thunderstorms')).toBe('showers + t-storms');
+  });
+
+  it('should replace thunderstorm (singular) with t-storm', () => {
+    expect(abbreviateForecast('slight chance thunderstorm')).toBe('slight chance t-storm');
+  });
+
+  it('should replace and with +', () => {
+    expect(abbreviateForecast('rain and snow')).toBe('rain + snow');
+  });
+
+  it("should replace scattered with sct'd", () => {
+    expect(abbreviateForecast('scattered showers')).toBe("sct'd showers");
+  });
+
+  it('should be case-insensitive', () => {
+    expect(abbreviateForecast('Scattered Thunderstorms')).toBe("sct'd t-storms");
+  });
+
+  it('should leave unabbreviated words unchanged', () => {
+    expect(abbreviateForecast('mostly cloudy')).toBe('mostly cloudy');
+  });
+});
+
 describe('formatPeriod', () => {
   it('should map a raw period to the output format', () => {
     expect(formatPeriod(mockPeriod)).toEqual({
@@ -82,10 +113,10 @@ describe('formatPeriod', () => {
     });
   });
 
-  it('should sentence-case the short forecast', () => {
+  it('should sentence-case and abbreviate the short forecast', () => {
     expect(
       formatPeriod({ ...mockPeriod, shortForecast: 'PARTLY CLOUDY AND WINDY' }).short_forecast
-    ).toBe('Partly cloudy and windy');
+    ).toBe('Partly cloudy + windy');
   });
 
   it('should handle already-lowercase short forecast', () => {
