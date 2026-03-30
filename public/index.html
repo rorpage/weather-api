@@ -7,9 +7,9 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    * {
+    *, *::before, *::after {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -17,25 +17,764 @@
 
     body {
       font-family: 'Figtree', sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       min-height: 100vh;
       background: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 2rem 1rem 3rem;
       border-top: 4px solid #3DB3F4;
       border-bottom: 4px solid #3DB3F4;
     }
 
-    h1 {
-      font-size: 3rem;
+    /* ── SETUP FORM ─────────────────────────────────── */
+    .setup {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      max-width: 380px;
+      width: 100%;
+      margin: auto;
+    }
+
+    .setup h1 {
+      font-size: 1.75rem;
       font-weight: 600;
       color: #fff;
+      letter-spacing: 0.05em;
+    }
+
+    .setup p {
+      font-size: 0.875rem;
+      color: #888;
       text-align: center;
-      padding: 0 1rem;
+      line-height: 1.6;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      width: 100%;
+    }
+
+    .form-group label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #777;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .form-input {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1rem;
+      padding: 0.55rem 0.8rem;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-input:focus {
+      border-color: #3DB3F4;
+    }
+
+    .btn-primary {
+      background: #3DB3F4;
+      border: none;
+      border-radius: 6px;
+      color: #000;
+      cursor: pointer;
+      font-family: 'Figtree', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      padding: 0.6rem 2rem;
+      text-transform: uppercase;
+      transition: background 0.15s;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: #60c6ff;
+    }
+
+    /* ── COCKPIT ────────────────────────────────────── */
+    .cockpit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .cockpit-header {
+      text-align: center;
+    }
+
+    .cockpit-header h1 {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 2rem;
+      font-weight: 400;
+      color: #3DB3F4;
+      letter-spacing: 0.3em;
+    }
+
+    .cockpit-header .obs-time {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: #555;
+      letter-spacing: 0.12em;
+      margin-top: 0.25rem;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .search-input {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1rem;
+      padding: 0.375rem 0.75rem;
+      width: 5.75rem;
+      text-align: center;
+      text-transform: uppercase;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-input:focus {
+      border-color: #3DB3F4;
+    }
+
+    .btn-update {
+      background: #3DB3F4;
+      border: none;
+      border-radius: 6px;
+      color: #000;
+      cursor: pointer;
+      font-family: 'Figtree', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      padding: 0.375rem 0.875rem;
+      text-transform: uppercase;
+      transition: background 0.15s;
+    }
+
+    .btn-update:hover {
+      background: #60c6ff;
+    }
+
+    .btn-settings {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #555;
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0.375rem 0.625rem;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .btn-settings:hover {
+      color: #aaa;
+      border-color: #555;
+    }
+
+    .status-msg {
+      font-size: 0.875rem;
+      color: #555;
+      text-align: center;
+      padding: 0.5rem;
+    }
+
+    .error-msg {
+      font-size: 0.875rem;
+      color: #ef4444;
+      text-align: center;
+      padding: 0.5rem;
+    }
+
+    /* ── INSTRUMENT PANEL ───────────────────────────── */
+    .instrument-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .gauge-wrap {
+      display: flex;
+      justify-content: center;
+    }
+
+    .gauge-wrap svg {
+      width: 100%;
+      max-width: 240px;
+      height: auto;
+    }
+
+    /* ── INFO STRIP ─────────────────────────────────── */
+    .info-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      width: 100%;
+    }
+
+    .info-card {
+      background: #0d0d0d;
+      border: 1px solid #1f1f1f;
+      border-radius: 6px;
+      padding: 0.6rem 0.875rem;
+    }
+
+    .info-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #555;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+
+    .info-value {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      color: #aaa;
+      line-height: 1.45;
+    }
+
+    /* ── RAW METAR ──────────────────────────────────── */
+    .raw-metar {
+      width: 100%;
+      background: #080808;
+      border: 1px solid #181818;
+      border-radius: 6px;
+      padding: 0.6rem 0.875rem;
+    }
+
+    .raw-metar .raw-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #444;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+
+    .raw-metar .raw-text {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: #555;
+      word-break: break-all;
+      line-height: 1.5;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 400px) {
+      .instrument-panel {
+        gap: 0.625rem;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>rorpage Weather API</h1>
+
+  <!-- ── SETUP PANEL ────────────────────────────────── -->
+  <div id="setup" class="setup">
+    <h1>rorpage Weather API</h1>
+    <p>Enter your API token and an airport ICAO identifier to view METAR cockpit data.</p>
+    <div class="form-group">
+      <label for="setup-token">API Token</label>
+      <input id="setup-token" class="form-input" type="password" placeholder="your-api-token" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label for="setup-airport">Airport ICAO ID</label>
+      <input id="setup-airport" class="form-input" type="text" placeholder="KUMP" maxlength="4" value="KUMP">
+    </div>
+    <button class="btn-primary" onclick="setupSubmit()">Load Weather</button>
+    <div id="setup-error" class="error-msg hidden"></div>
+  </div>
+
+  <!-- ── COCKPIT ────────────────────────────────────── -->
+  <div id="cockpit" class="cockpit hidden">
+    <div class="cockpit-header">
+      <h1 id="cockpit-id">----</h1>
+      <div class="obs-time" id="cockpit-time">--:-- L</div>
+    </div>
+
+    <div class="search-bar">
+      <input id="airport-input" class="search-input" type="text" maxlength="4" value="KUMP">
+      <button class="btn-update" onclick="fetchMetar()">Update</button>
+      <button class="btn-settings" onclick="resetSetup()" title="API Settings">⚙</button>
+    </div>
+
+    <div id="cockpit-loading" class="status-msg">Loading…</div>
+    <div id="cockpit-error" class="error-msg hidden"></div>
+
+    <div id="instruments" class="instrument-panel hidden">
+      <div class="gauge-wrap">
+        <svg id="gauge-temp" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="gauge-wrap">
+        <svg id="gauge-wind" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="gauge-wrap">
+        <svg id="gauge-alt" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="gauge-wrap">
+        <svg id="gauge-fc" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+    <div id="info-strip" class="info-strip hidden">
+      <div class="info-card">
+        <div class="info-label">Sky Conditions</div>
+        <div class="info-value" id="sky-text">—</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Visibility</div>
+        <div class="info-value" id="visibility-text">—</div>
+      </div>
+    </div>
+
+    <div id="raw-metar-box" class="raw-metar hidden">
+      <div class="raw-label">Raw METAR</div>
+      <div class="raw-text" id="raw-metar-text">—</div>
+    </div>
+  </div>
+
+  <script>
+    const TOKEN_KEY = 'metar_api_token';
+    const AIRPORT_KEY = 'metar_airport';
+
+    const FC_COLORS = {
+      VFR: '#22c55e',
+      MVFR: '#3b82f6',
+      IFR: '#ef4444',
+      LIFR: '#d946ef',
+    };
+
+    function fcColor(category) {
+      return FC_COLORS[(category || '').toUpperCase()] || '#888';
+    }
+
+    // ── SVG helpers ────────────────────────────────────
+    function svgEl(tag, attrs) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      for (const [key, value] of Object.entries(attrs || {})) {
+        el.setAttribute(key, String(value));
+      }
+      return el;
+    }
+
+    function svgText(content, attrs) {
+      const el = svgEl('text', attrs);
+      el.textContent = content;
+      return el;
+    }
+
+    function clearSvg(svg) {
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+    }
+
+    // Draw the base gauge: black-outlined bezel + gray face
+    function drawBase(svg) {
+      svg.appendChild(svgEl('circle', {
+        cx: 100, cy: 100, r: 96,
+        stroke: '#000', 'stroke-width': 5, fill: '#2a2a2a',
+      }));
+      svg.appendChild(svgEl('circle', {
+        cx: 100, cy: 100, r: 87,
+        stroke: '#000', 'stroke-width': 2, fill: '#555',
+      }));
+    }
+
+    // Draw tick marks along the inner edge of the face
+    function drawTicks(svg) {
+      for (let deg = 0; deg < 360; deg += 10) {
+        const rad = (deg - 90) * Math.PI / 180;
+        const outerRadius = 85;
+        const tickLength = deg % 30 === 0 ? 10 : 5;
+        svg.appendChild(svgEl('line', {
+          x1: 100 + outerRadius * Math.cos(rad),
+          y1: 100 + outerRadius * Math.sin(rad),
+          x2: 100 + (outerRadius - tickLength) * Math.cos(rad),
+          y2: 100 + (outerRadius - tickLength) * Math.sin(rad),
+          stroke: '#666',
+          'stroke-width': deg % 30 === 0 ? 2 : 1,
+        }));
+      }
+    }
+
+    // ── TEMPERATURE GAUGE ──────────────────────────────
+    function renderTemp(svg, tempC) {
+      clearSvg(svg);
+      drawBase(svg);
+      drawTicks(svg);
+
+      const display = tempC !== null && tempC !== undefined ? `${Math.round(tempC)}°` : '--°';
+
+      svg.appendChild(svgText(display, {
+        x: 100, y: 118,
+        'text-anchor': 'middle',
+        fill: '#fff',
+        'font-family': "'Share Tech Mono', monospace",
+        'font-size': 52,
+        'font-weight': 'bold',
+      }));
+
+      svg.appendChild(svgText('Celsius', {
+        x: 100, y: 144,
+        'text-anchor': 'middle',
+        fill: '#bbb',
+        'font-family': "'Figtree', sans-serif",
+        'font-size': 14,
+      }));
+
+      svg.appendChild(svgText('TEMPERATURE', {
+        x: 100, y: 168,
+        'text-anchor': 'middle',
+        fill: '#777',
+        'font-family': "'Figtree', sans-serif",
+        'font-size': 10,
+        'letter-spacing': 1.5,
+      }));
+    }
+
+    // ── WIND GAUGE ─────────────────────────────────────
+    // Compass rose with a direction needle and central speed display.
+    function renderWind(svg, windDirection, windSpeed) {
+      clearSvg(svg);
+      drawBase(svg);
+
+      // Compass tick marks at the edge of the face
+      for (let deg = 0; deg < 360; deg += 10) {
+        const rad = (deg - 90) * Math.PI / 180;
+        const outerRadius = 84;
+        const tickLength = deg % 30 === 0 ? 10 : 5;
+        svg.appendChild(svgEl('line', {
+          x1: 100 + outerRadius * Math.cos(rad),
+          y1: 100 + outerRadius * Math.sin(rad),
+          x2: 100 + (outerRadius - tickLength) * Math.cos(rad),
+          y2: 100 + (outerRadius - tickLength) * Math.sin(rad),
+          stroke: '#666',
+          'stroke-width': deg % 30 === 0 ? 2 : 1,
+        }));
+      }
+
+      // Cardinal labels – N highlighted in red as is traditional
+      const cardinals = [
+        { label: 'N', angle: 0 },
+        { label: 'E', angle: 90 },
+        { label: 'S', angle: 180 },
+        { label: 'W', angle: 270 },
+      ];
+      cardinals.forEach(({ label, angle }) => {
+        const rad = (angle - 90) * Math.PI / 180;
+        const labelRadius = 68;
+        svg.appendChild(svgText(label, {
+          x: 100 + labelRadius * Math.cos(rad),
+          y: 100 + labelRadius * Math.sin(rad) + 5,
+          'text-anchor': 'middle',
+          fill: label === 'N' ? '#f87171' : '#ccc',
+          'font-family': "'Share Tech Mono', monospace",
+          'font-size': 13,
+          'font-weight': label === 'N' ? 'bold' : 'normal',
+        }));
+      });
+
+      const isCalm = windDirection === 0 && windSpeed === 0;
+
+      if (!isCalm) {
+        // Direction needle: starts at the edge of the center circle (r=21),
+        // extends outward to r=54 so it never overlaps the central speed display.
+        const needleRad = (windDirection - 90) * Math.PI / 180;
+        const innerRadius = 21;
+        const tipRadius = 54;
+
+        const startX = 100 + innerRadius * Math.cos(needleRad);
+        const startY = 100 + innerRadius * Math.sin(needleRad);
+        const tipX = 100 + tipRadius * Math.cos(needleRad);
+        const tipY = 100 + tipRadius * Math.sin(needleRad);
+
+        // Needle shaft
+        svg.appendChild(svgEl('line', {
+          x1: startX, y1: startY,
+          x2: tipX, y2: tipY,
+          stroke: '#f87171', 'stroke-width': 3, 'stroke-linecap': 'round',
+        }));
+
+        // Arrowhead
+        const perpRad = needleRad + Math.PI / 2;
+        const headSize = 8;
+        svg.appendChild(svgEl('polygon', {
+          points: [
+            `${tipX},${tipY}`,
+            `${tipX - headSize * Math.cos(needleRad) + (headSize / 2) * Math.cos(perpRad)},${tipY - headSize * Math.sin(needleRad) + (headSize / 2) * Math.sin(perpRad)}`,
+            `${tipX - headSize * Math.cos(needleRad) - (headSize / 2) * Math.cos(perpRad)},${tipY - headSize * Math.sin(needleRad) - (headSize / 2) * Math.sin(perpRad)}`,
+          ].join(' '),
+          fill: '#f87171',
+        }));
+      }
+
+      // Center circle – provides a clean background for the speed readout
+      // and visually anchors the needle
+      svg.appendChild(svgEl('circle', {
+        cx: 100, cy: 100, r: 20,
+        fill: '#333', stroke: '#444', 'stroke-width': 1,
+      }));
+
+      if (isCalm) {
+        svg.appendChild(svgEl('circle', {
+          cx: 100, cy: 100, r: 8,
+          stroke: '#aaa', 'stroke-width': 2, fill: 'none',
+        }));
+      } else {
+        svg.appendChild(svgText(String(windSpeed), {
+          x: 100, y: 106,
+          'text-anchor': 'middle',
+          fill: '#fff',
+          'font-family': "'Share Tech Mono', monospace",
+          'font-size': windSpeed >= 100 ? 13 : 18,
+          'font-weight': 'bold',
+        }));
+      }
+
+      // Speed unit and degrees – placed below compass rose, clear of the needle range
+      const speedLabel = isCalm ? 'CALM' : `${windSpeed} kt  ${windDirection}°`;
+      svg.appendChild(svgText(speedLabel, {
+        x: 100, y: 168,
+        'text-anchor': 'middle',
+        fill: '#bbb',
+        'font-family': "'Share Tech Mono', monospace",
+        'font-size': 11,
+      }));
+
+      svg.appendChild(svgText('WIND', {
+        x: 100, y: 182,
+        'text-anchor': 'middle',
+        fill: '#777',
+        'font-family': "'Figtree', sans-serif",
+        'font-size': 10,
+        'letter-spacing': 1.5,
+      }));
+    }
+
+    // ── ALTIMETER GAUGE ────────────────────────────────
+    function renderAlt(svg, altimeter) {
+      clearSvg(svg);
+      drawBase(svg);
+      drawTicks(svg);
+
+      const display = altimeter || '--';
+
+      svg.appendChild(svgText(display, {
+        x: 100, y: 112,
+        'text-anchor': 'middle',
+        fill: '#fff',
+        'font-family': "'Share Tech Mono', monospace",
+        'font-size': 36,
+        'font-weight': 'bold',
+      }));
+
+      svg.appendChild(svgText('inHg', {
+        x: 100, y: 136,
+        'text-anchor': 'middle',
+        fill: '#bbb',
+        'font-family': "'Figtree', sans-serif",
+        'font-size': 15,
+      }));
+
+      svg.appendChild(svgText('ALTIMETER', {
+        x: 100, y: 168,
+        'text-anchor': 'middle',
+        fill: '#777',
+        'font-family': "'Figtree', sans-serif",
+        'font-size': 10,
+        'letter-spacing': 1.5,
+      }));
+    }
+
+    // ── FLIGHT CATEGORY GAUGE ──────────────────────────
+    // Darker outer circle, lighter inner circle, category text in category color.
+    function renderFlightCategory(svg, category) {
+      clearSvg(svg);
+      const color = fcColor(category);
+
+      // Outer ring – darker background with black outline
+      svg.appendChild(svgEl('circle', {
+        cx: 100, cy: 100, r: 96,
+        stroke: '#000', 'stroke-width': 5, fill: '#1a1a1a',
+      }));
+
+      // Colored accent ring between outer and inner circles
+      svg.appendChild(svgEl('circle', {
+        cx: 100, cy: 100, r: 83,
+        stroke: color, 'stroke-width': 7, fill: 'none', opacity: 0.65,
+      }));
+
+      // Inner circle – lighter background with black outline
+      svg.appendChild(svgEl('circle', {
+        cx: 100, cy: 100, r: 76,
+        stroke: '#000', 'stroke-width': 2, fill: '#888',
+      }));
+
+      const cat = (category || '--').toUpperCase();
+
+      svg.appendChild(svgText(cat, {
+        x: 100, y: 112,
+        'text-anchor': 'middle',
+        fill: color,
+        'font-family': "'Share Tech Mono', monospace",
+        'font-size': cat.length > 3 ? 28 : 36,
+        'font-weight': 'bold',
+      }));
+
+      svg.appendChild(svgText('FLIGHT CATEGORY', {
+        x: 100, y: 145,
+        'text-anchor': 'middle',
+        fill: '#444',
+        'font-family': "'Figtree', sans-serif",
+        'font-size': 9,
+        'letter-spacing': 1.5,
+      }));
+    }
+
+    // ── RENDER FULL COCKPIT ────────────────────────────
+    function renderCockpit(data) {
+      document.getElementById('cockpit-loading').classList.add('hidden');
+      document.getElementById('cockpit-error').classList.add('hidden');
+
+      document.getElementById('cockpit-id').textContent = data.id || '----';
+      document.getElementById('cockpit-time').textContent = data.observation_time || '--:-- L';
+
+      const airportInput = document.getElementById('airport-input');
+      if (airportInput && data.id) airportInput.value = data.id;
+
+      renderTemp(document.getElementById('gauge-temp'), data.temperature);
+      renderWind(
+        document.getElementById('gauge-wind'),
+        data.wind?.direction ?? 0,
+        data.wind?.speed ?? 0
+      );
+      renderAlt(document.getElementById('gauge-alt'), data.altimeter);
+      renderFlightCategory(document.getElementById('gauge-fc'), data.flight_category);
+
+      const skyText = data.sky_conditions?.map((s) => s.description).join('\n') || '—';
+      document.getElementById('sky-text').textContent = skyText;
+      document.getElementById('visibility-text').textContent =
+        data.visibility !== undefined ? `${data.visibility} SM` : '—';
+      document.getElementById('raw-metar-text').textContent = data.raw_text || '—';
+
+      document.getElementById('instruments').classList.remove('hidden');
+      document.getElementById('info-strip').classList.remove('hidden');
+      document.getElementById('raw-metar-box').classList.remove('hidden');
+    }
+
+    // ── FETCH METAR ────────────────────────────────────
+    async function fetchMetar() {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) {
+        showSetup();
+        return;
+      }
+
+      const airportInput = document.getElementById('airport-input');
+      const airport = (airportInput?.value || '').toUpperCase().trim() || 'KUMP';
+      localStorage.setItem(AIRPORT_KEY, airport);
+
+      document.getElementById('cockpit-loading').classList.remove('hidden');
+      document.getElementById('cockpit-error').classList.add('hidden');
+      document.getElementById('instruments').classList.add('hidden');
+      document.getElementById('info-strip').classList.add('hidden');
+      document.getElementById('raw-metar-box').classList.add('hidden');
+
+      try {
+        const response = await fetch(`/api/metar?id=${encodeURIComponent(airport)}`, {
+          headers: { 'x-api-token': token },
+        });
+
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body.error || `HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        renderCockpit(data);
+      } catch (error) {
+        document.getElementById('cockpit-loading').classList.add('hidden');
+        const errorEl = document.getElementById('cockpit-error');
+        errorEl.textContent = `Error: ${error instanceof Error ? error.message : String(error)}`;
+        errorEl.classList.remove('hidden');
+      }
+    }
+
+    // ── SETUP FLOW ─────────────────────────────────────
+    function showSetup() {
+      document.getElementById('setup').classList.remove('hidden');
+      document.getElementById('cockpit').classList.add('hidden');
+    }
+
+    function showCockpit(airport) {
+      document.getElementById('setup').classList.add('hidden');
+      document.getElementById('cockpit').classList.remove('hidden');
+      document.getElementById('airport-input').value = airport;
+    }
+
+    function setupSubmit() {
+      const token = document.getElementById('setup-token').value.trim();
+      const airport = (document.getElementById('setup-airport').value.trim() || 'KUMP').toUpperCase();
+      const errorEl = document.getElementById('setup-error');
+
+      if (!token) {
+        errorEl.textContent = 'API token is required.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      errorEl.classList.add('hidden');
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(AIRPORT_KEY, airport);
+      showCockpit(airport);
+      fetchMetar();
+    }
+
+    function resetSetup() {
+      localStorage.removeItem(TOKEN_KEY);
+      showSetup();
+    }
+
+    // ── INIT ───────────────────────────────────────────
+    (function init() {
+      const token = localStorage.getItem(TOKEN_KEY);
+      const airport = localStorage.getItem(AIRPORT_KEY) || 'KUMP';
+      if (token) {
+        showCockpit(airport);
+        fetchMetar();
+      } else {
+        showSetup();
+      }
+    })();
+  </script>
 </body>
 </html>
