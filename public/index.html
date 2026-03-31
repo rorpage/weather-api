@@ -286,6 +286,18 @@
       line-height: 1.5;
     }
 
+    /* ── GAUGE LABEL (outside the circle) ──────────── */
+    .gauge-label {
+      text-align: center;
+      font-family: 'Figtree', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #777;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-top: 0.4rem;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -334,15 +346,19 @@
     <div id="instruments" class="instrument-panel hidden">
       <div class="gauge-wrap">
         <svg id="gauge-temp" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="gauge-label">Temperature</div>
       </div>
       <div class="gauge-wrap">
         <svg id="gauge-wind" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="gauge-label">Wind</div>
       </div>
       <div class="gauge-wrap">
         <svg id="gauge-alt" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="gauge-label">Altimeter</div>
       </div>
       <div class="gauge-wrap">
         <svg id="gauge-fc" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="gauge-label">Flight Category</div>
       </div>
     </div>
 
@@ -374,8 +390,20 @@
       LIFR: '#d946ef',
     };
 
+    // Lighter pastel tint of each category color for the inner circle background
+    const FC_COLORS_LIGHT = {
+      VFR: '#86efac',
+      MVFR: '#93c5fd',
+      IFR: '#fca5a5',
+      LIFR: '#f0abfc',
+    };
+
     function fcColor(category) {
       return FC_COLORS[(category || '').toUpperCase()] || '#888';
+    }
+
+    function fcColorLight(category) {
+      return FC_COLORS_LIGHT[(category || '').toUpperCase()] || '#aaa';
     }
 
     // ── SVG helpers ────────────────────────────────────
@@ -435,7 +463,7 @@
       const display = tempC !== null && tempC !== undefined ? `${Math.round(tempC)}°` : '--°';
 
       svg.appendChild(svgText(display, {
-        x: 100, y: 118,
+        x: 100, y: 114,
         'text-anchor': 'middle',
         fill: '#fff',
         'font-family': "'Share Tech Mono', monospace",
@@ -444,30 +472,46 @@
       }));
 
       svg.appendChild(svgText('Celsius', {
-        x: 100, y: 144,
+        x: 100, y: 140,
         'text-anchor': 'middle',
         fill: '#bbb',
         'font-family': "'Figtree', sans-serif",
         'font-size': 14,
       }));
-
-      svg.appendChild(svgText('TEMPERATURE', {
-        x: 100, y: 168,
-        'text-anchor': 'middle',
-        fill: '#777',
-        'font-family': "'Figtree', sans-serif",
-        'font-size': 10,
-        'letter-spacing': 1.5,
-      }));
     }
 
     // ── WIND GAUGE ─────────────────────────────────────
-    // Compass rose with a direction needle and central speed display.
+    // Compass rose with a white arc on the outer bezel showing wind direction.
     function renderWind(svg, windDirection, windSpeed) {
       clearSvg(svg);
       drawBase(svg);
 
-      // Compass tick marks at the edge of the face
+      const isCalm = windDirection === 0 && windSpeed === 0;
+
+      // White arc on the outer bezel ring highlighting the wind direction.
+      // The arc is drawn at r=91 (midpoint of the bezel between r=87 and r=96)
+      // with stroke-width=8 so it stays within the bezel.
+      if (!isCalm) {
+        const arcRadius = 91;
+        const circumference = 2 * Math.PI * arcRadius;
+        const arcSpanDeg = 45;
+        const arcLength = (arcSpanDeg / 360) * circumference;
+        const gapLength = circumference - arcLength;
+        // SVG strokes start at 3 o'clock. Compass 0° = top (12 o'clock).
+        // Rotate so the arc is centered on windDirection.
+        const rotateAngle = windDirection - arcSpanDeg / 2 - 90;
+        svg.appendChild(svgEl('circle', {
+          cx: 100, cy: 100, r: arcRadius,
+          fill: 'none',
+          stroke: 'rgba(255,255,255,0.8)',
+          'stroke-width': 8,
+          'stroke-dasharray': `${arcLength.toFixed(2)} ${gapLength.toFixed(2)}`,
+          transform: `rotate(${rotateAngle}, 100, 100)`,
+          'stroke-linecap': 'round',
+        }));
+      }
+
+      // Compass tick marks on the face edge
       for (let deg = 0; deg < 360; deg += 10) {
         const rad = (deg - 90) * Math.PI / 180;
         const outerRadius = 84;
@@ -482,7 +526,7 @@
         }));
       }
 
-      // Cardinal labels – N highlighted in red as is traditional
+      // Cardinal labels at radius 60 – inward enough to avoid the degree label below
       const cardinals = [
         { label: 'N', angle: 0 },
         { label: 'E', angle: 90 },
@@ -491,7 +535,7 @@
       ];
       cardinals.forEach(({ label, angle }) => {
         const rad = (angle - 90) * Math.PI / 180;
-        const labelRadius = 68;
+        const labelRadius = 60;
         svg.appendChild(svgText(label, {
           x: 100 + labelRadius * Math.cos(rad),
           y: 100 + labelRadius * Math.sin(rad) + 5,
@@ -503,44 +547,9 @@
         }));
       });
 
-      const isCalm = windDirection === 0 && windSpeed === 0;
-
-      if (!isCalm) {
-        // Direction needle: starts at the edge of the center circle (r=21),
-        // extends outward to r=54 so it never overlaps the central speed display.
-        const needleRad = (windDirection - 90) * Math.PI / 180;
-        const innerRadius = 21;
-        const tipRadius = 54;
-
-        const startX = 100 + innerRadius * Math.cos(needleRad);
-        const startY = 100 + innerRadius * Math.sin(needleRad);
-        const tipX = 100 + tipRadius * Math.cos(needleRad);
-        const tipY = 100 + tipRadius * Math.sin(needleRad);
-
-        // Needle shaft
-        svg.appendChild(svgEl('line', {
-          x1: startX, y1: startY,
-          x2: tipX, y2: tipY,
-          stroke: '#f87171', 'stroke-width': 3, 'stroke-linecap': 'round',
-        }));
-
-        // Arrowhead
-        const perpRad = needleRad + Math.PI / 2;
-        const headSize = 8;
-        svg.appendChild(svgEl('polygon', {
-          points: [
-            `${tipX},${tipY}`,
-            `${tipX - headSize * Math.cos(needleRad) + (headSize / 2) * Math.cos(perpRad)},${tipY - headSize * Math.sin(needleRad) + (headSize / 2) * Math.sin(perpRad)}`,
-            `${tipX - headSize * Math.cos(needleRad) - (headSize / 2) * Math.cos(perpRad)},${tipY - headSize * Math.sin(needleRad) - (headSize / 2) * Math.sin(perpRad)}`,
-          ].join(' '),
-          fill: '#f87171',
-        }));
-      }
-
-      // Center circle – provides a clean background for the speed readout
-      // and visually anchors the needle
+      // Center circle – clean background for speed display
       svg.appendChild(svgEl('circle', {
-        cx: 100, cy: 100, r: 20,
+        cx: 100, cy: 100, r: 26,
         fill: '#333', stroke: '#444', 'stroke-width': 1,
       }));
 
@@ -551,33 +560,32 @@
         }));
       } else {
         svg.appendChild(svgText(String(windSpeed), {
-          x: 100, y: 106,
+          x: 100, y: 97,
           'text-anchor': 'middle',
           fill: '#fff',
           'font-family': "'Share Tech Mono', monospace",
-          'font-size': windSpeed >= 100 ? 13 : 18,
+          'font-size': windSpeed >= 100 ? 14 : 20,
           'font-weight': 'bold',
+        }));
+        svg.appendChild(svgText('kt', {
+          x: 100, y: 112,
+          'text-anchor': 'middle',
+          fill: '#aaa',
+          'font-family': "'Figtree', sans-serif",
+          'font-size': 10,
         }));
       }
 
-      // Speed unit and degrees – placed below compass rose, clear of the needle range
-      const speedLabel = isCalm ? 'CALM' : `${windSpeed} kt  ${windDirection}°`;
-      svg.appendChild(svgText(speedLabel, {
-        x: 100, y: 168,
-        'text-anchor': 'middle',
-        fill: '#bbb',
-        'font-family': "'Share Tech Mono', monospace",
-        'font-size': 11,
-      }));
-
-      svg.appendChild(svgText('WIND', {
-        x: 100, y: 182,
-        'text-anchor': 'middle',
-        fill: '#777',
-        'font-family': "'Figtree', sans-serif",
-        'font-size': 10,
-        'letter-spacing': 1.5,
-      }));
+      // Wind direction degrees – anchored below the S cardinal, inside the face
+      if (!isCalm) {
+        svg.appendChild(svgText(`${windDirection}°`, {
+          x: 100, y: 182,
+          'text-anchor': 'middle',
+          fill: '#888',
+          'font-family': "'Share Tech Mono', monospace",
+          'font-size': 11,
+        }));
+      }
     }
 
     // ── ALTIMETER GAUGE ────────────────────────────────
@@ -589,7 +597,7 @@
       const display = altimeter || '--';
 
       svg.appendChild(svgText(display, {
-        x: 100, y: 112,
+        x: 100, y: 108,
         'text-anchor': 'middle',
         fill: '#fff',
         'font-family': "'Share Tech Mono', monospace",
@@ -598,28 +606,20 @@
       }));
 
       svg.appendChild(svgText('inHg', {
-        x: 100, y: 136,
+        x: 100, y: 132,
         'text-anchor': 'middle',
         fill: '#bbb',
         'font-family': "'Figtree', sans-serif",
         'font-size': 15,
       }));
-
-      svg.appendChild(svgText('ALTIMETER', {
-        x: 100, y: 168,
-        'text-anchor': 'middle',
-        fill: '#777',
-        'font-family': "'Figtree', sans-serif",
-        'font-size': 10,
-        'letter-spacing': 1.5,
-      }));
     }
 
     // ── FLIGHT CATEGORY GAUGE ──────────────────────────
-    // Darker outer circle, lighter inner circle, category text in category color.
+    // Darker outer ring, lighter inner circle tinted with the category color.
     function renderFlightCategory(svg, category) {
       clearSvg(svg);
       const color = fcColor(category);
+      const colorLight = fcColorLight(category);
 
       // Outer ring – darker background with black outline
       svg.appendChild(svgEl('circle', {
@@ -633,30 +633,21 @@
         stroke: color, 'stroke-width': 7, fill: 'none', opacity: 0.65,
       }));
 
-      // Inner circle – lighter background with black outline
+      // Inner circle – lighter tint of the category color
       svg.appendChild(svgEl('circle', {
         cx: 100, cy: 100, r: 76,
-        stroke: '#000', 'stroke-width': 2, fill: '#888',
+        stroke: '#000', 'stroke-width': 2, fill: colorLight,
       }));
 
       const cat = (category || '--').toUpperCase();
 
       svg.appendChild(svgText(cat, {
-        x: 100, y: 112,
+        x: 100, y: 108,
         'text-anchor': 'middle',
         fill: color,
         'font-family': "'Share Tech Mono', monospace",
         'font-size': cat.length > 3 ? 28 : 36,
         'font-weight': 'bold',
-      }));
-
-      svg.appendChild(svgText('FLIGHT CATEGORY', {
-        x: 100, y: 145,
-        'text-anchor': 'middle',
-        fill: '#444',
-        'font-family': "'Figtree', sans-serif",
-        'font-size': 9,
-        'letter-spacing': 1.5,
       }));
     }
 
