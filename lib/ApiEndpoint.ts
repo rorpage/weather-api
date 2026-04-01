@@ -8,6 +8,14 @@ export abstract class ApiEndpoint {
   protected abstract getRequiredParams(): string[];
 
   /**
+   * Whether this endpoint requires authentication. Defaults to true.
+   * Override and return false to make an endpoint publicly accessible.
+   */
+  protected requiresAuth(): boolean {
+    return true;
+  }
+
+  /**
    * Process the request and return the response data
    */
   protected abstract process(request: VercelRequest): Promise<unknown>;
@@ -23,7 +31,7 @@ export abstract class ApiEndpoint {
       }
 
       const authError = validateAuth(request.headers);
-      if (authError) {
+      if (this.requiresAuth() && authError) {
         return response.status(authError.status).json({ error: authError.error });
       }
 

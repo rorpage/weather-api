@@ -12,6 +12,10 @@ class MetarEndpoint extends ApiEndpoint {
     this.garminService = new GarminService();
   }
 
+  protected requiresAuth(): boolean {
+    return false;
+  }
+
   protected getRequiredParams(): string[] {
     return []; // id is optional with default value
   }
