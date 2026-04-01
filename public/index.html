@@ -255,6 +255,10 @@
         <svg id="gauge-vis" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="gauge-label">Visibility</div>
       </div>
+      <div class="gauge-wrap">
+        <svg id="gauge-dew" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="gauge-label">Dewpoint</div>
+      </div>
     </div>
 
     <div id="info-strip" class="info-strip hidden">
@@ -273,11 +277,12 @@
   <script>
     const AIRPORT_KEY = 'metar_airport';
 
-    const FC_COLORS = {
-      VFR: '#22c55e',
-      MVFR: '#3b82f6',
-      IFR: '#ef4444',
-      LIFR: '#d946ef',
+    // Dark shade of each category color — used for the outer ring of the FC gauge
+    const FC_COLORS_DARK = {
+      VFR: '#15803d',
+      MVFR: '#1d4ed8',
+      IFR: '#b91c1c',
+      LIFR: '#a21caf',
     };
 
     // Lighter pastel tint of each category color for the inner circle background
@@ -288,8 +293,8 @@
       LIFR: '#f0abfc',
     };
 
-    function fcColor(category) {
-      return FC_COLORS[(category || '').toUpperCase()] || '#888';
+    function fcColorDark(category) {
+      return FC_COLORS_DARK[(category || '').toUpperCase()] || '#444';
     }
 
     function fcColorLight(category) {
@@ -474,17 +479,16 @@
     }
 
     // ── FLIGHT CATEGORY GAUGE ──────────────────────────
-    // Standard drawBase bezel with a colored inner ring and light center fill.
+    // Dark colored outer ring with a light pastel center — no gray at all.
     function renderFlightCategory(svg, category) {
       clearSvg(svg);
-      drawBase(svg);
-      const color = fcColor(category);
+      const colorDark = fcColorDark(category);
       const colorLight = fcColorLight(category);
 
-      // Colored face — covers the standard gray face with the category color
+      // Outer circle filled with the dark category color (forms the colored ring)
       svg.appendChild(svgEl('circle', {
-        cx: 100, cy: 100, r: 87,
-        fill: color, stroke: 'none',
+        cx: 100, cy: 100, r: 96,
+        fill: colorDark, stroke: '#000', 'stroke-width': 3,
       }));
 
       // Light inner circle
@@ -523,6 +527,24 @@
       }));
     }
 
+    // ── DEWPOINT GAUGE ─────────────────────────────────
+    function renderDew(svg, dewpoint) {
+      clearSvg(svg);
+      drawBase(svg);
+      drawTicks(svg);
+
+      const display = dewpoint !== null && dewpoint !== undefined ? `${Math.round(dewpoint)}°C` : '--°C';
+
+      svg.appendChild(svgText(display, {
+        x: 100, y: 108,
+        'text-anchor': 'middle',
+        fill: '#fff',
+        'font-family': "'Share Tech Mono', monospace",
+        'font-size': 24,
+        'font-weight': 'bold',
+      }));
+    }
+
     // ── RENDER FULL COCKPIT ────────────────────────────
     function renderCockpit(data) {
       document.getElementById('cockpit-loading').classList.add('hidden');
@@ -543,6 +565,7 @@
       renderAlt(document.getElementById('gauge-alt'), data.altimeter);
       renderFlightCategory(document.getElementById('gauge-fc'), data.flight_category);
       renderVis(document.getElementById('gauge-vis'), data.visibility);
+      renderDew(document.getElementById('gauge-dew'), data.dewpoint);
 
       const skyText = data.sky_conditions?.map((s) => s.description).join('\n') || '—';
       document.getElementById('sky-text').textContent = skyText;
