@@ -49,6 +49,19 @@ To add a new endpoint:
    }
    ```
 
+## Cockpit UI
+
+The root page (`/`) serves a steam-gauge cockpit instrument panel that displays live METAR aviation weather data. It auto-fetches data on load and remembers the last used airport in `localStorage`.
+
+**Features:**
+- Six SVG circle gauges: Flight Category, Temperature, Wind, Altimeter, Visibility, Dewpoint
+- Flight Category gauge uses color-coded rings: VFR (green), MVFR (blue), IFR (red), LIFR (magenta)
+- Wind gauge shows a compass rose with a directional arc tick on the bezel and speed/direction in the center
+- Sky conditions info strip and full raw METAR string displayed below the gauges
+- No authentication required — calls the public `/api/metar` endpoint directly
+
+The cockpit HTML is in `public/index.html` and all gauge rendering logic lives in `public/cockpit.js`.
+
 ## Setup
 
 1. Copy `.env.example` to `.env.local`:
@@ -147,7 +160,7 @@ This ensures all committed code meets quality standards.
 All code quality checks are enforced via pre-commit hooks using Husky:
 
 - **Before each commit**: Formats, lints, and type-checks code automatically
-- **77 tests** with 97%+ coverage ensure reliability
+- **125+ tests** with 97%+ coverage ensure reliability
 - **Strict TypeScript** mode catches errors at compile time
 
 This ensures only high-quality, tested code makes it into the repository and gets deployed.
@@ -207,20 +220,52 @@ curl -H "x-api-token: your_token_here" \
 
 **Method:** `GET`
 
-**Headers:**
-
-- `x-api-token` (required): API token for authentication
+> **Authentication:** None required — this endpoint is publicly accessible without an `x-api-token` header.
 
 **Query Parameters:**
 
-- `id` (optional): Airport identifier (e.g., KUMP, KJFK). Default: `KUMP`
+- `id` (optional): Airport ICAO identifier (e.g., KUMP, KJFK). Default: `KUMP`
 
 **Example Request:**
 
 ```bash
-curl -H "x-api-token: your_token_here" \
-  "http://localhost:3000/api/metar?id=KJFK"
+curl "http://localhost:3000/api/metar?id=KJFK"
 ```
+
+**Response:**
+
+```json
+{
+  "id": "KJFK",
+  "raw_text": "KJFK 011551Z 27012KT 10SM FEW050 SCT080 18/07 A2994 RMK AO2 SLP142",
+  "observation_time": "15:51 L",
+  "temperature": 18,
+  "dewpoint": 7,
+  "wind": {
+    "direction": 270,
+    "speed": 12
+  },
+  "visibility": 10,
+  "altimeter": 29.94,
+  "flight_category": "VFR",
+  "sky_conditions": [
+    { "coverage": "FEW", "base_feet": 5000, "description": "Few at 5000ft" },
+    { "coverage": "SCT", "base_feet": 8000, "description": "Scattered at 8000ft" }
+  ]
+}
+```
+
+- `id` (string): Airport ICAO identifier
+- `raw_text` (string): Full raw METAR string
+- `observation_time` (string): Local observation time (e.g., `"15:51 L"`)
+- `temperature` (number): Temperature in °C
+- `dewpoint` (number): Dewpoint temperature in °C
+- `wind.direction` (number): Wind direction in degrees (0–360)
+- `wind.speed` (number): Wind speed in knots
+- `visibility` (number): Visibility in statute miles (SM)
+- `altimeter` (number): Altimeter setting in inHg
+- `flight_category` (string): `"VFR"`, `"MVFR"`, `"IFR"`, or `"LIFR"`
+- `sky_conditions` (array): Cloud layers, each with `coverage`, `base_feet`, and `description`
 
 ### NWS Current Conditions Endpoint
 
