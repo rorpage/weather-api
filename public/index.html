@@ -7,35 +7,66 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Figtree', sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: #000;
-      border-top: 4px solid #3DB3F4;
-      border-bottom: 4px solid #3DB3F4;
-    }
-
-    h1 {
-      font-size: 3rem;
-      font-weight: 600;
-      color: #fff;
-      text-align: center;
-      padding: 0 1rem;
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/cockpit.css">
 </head>
 <body>
-  <h1>rorpage Weather API</h1>
+
+  <!-- ── COCKPIT ────────────────────────────────────── -->
+  <div id="cockpit" class="cockpit">
+    <div class="cockpit-header">
+      <h1 id="cockpit-id">----</h1>
+      <div class="obs-time" id="cockpit-time">--:-- L</div>
+    </div>
+
+    <div class="search-bar">
+      <input id="airport-input" class="search-input" type="text" maxlength="4" value="KUMP">
+      <button class="btn-update" onclick="fetchMetar()">Update</button>
+    </div>
+
+    <div id="cockpit-loading" class="status-msg">Loading…</div>
+    <div id="cockpit-error" class="error-msg hidden"></div>
+
+    <div id="instruments" class="instrument-panel hidden">
+      <div class="gauge-wrap">
+        <svg id="gauge-fc" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="gauge-label">Flight Category</div>
+      </div>
+      <div class="gauge-wrap">
+        <svg id="gauge-temp" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="gauge-label">Temperature</div>
+      </div>
+      <div class="gauge-wrap">
+        <svg id="gauge-wind" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="gauge-label">Wind</div>
+      </div>
+      <div class="gauge-wrap">
+        <svg id="gauge-alt" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="gauge-label">Altimeter</div>
+      </div>
+      <div class="gauge-wrap">
+        <svg id="gauge-vis" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="gauge-label">Visibility</div>
+      </div>
+      <div class="gauge-wrap">
+        <svg id="gauge-dew" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="gauge-label">Dewpoint</div>
+      </div>
+    </div>
+
+    <div id="info-strip" class="info-strip hidden">
+      <div class="info-card">
+        <div class="info-label">Sky Conditions</div>
+        <div class="info-value" id="sky-text">—</div>
+      </div>
+    </div>
+
+    <div id="raw-metar-box" class="raw-metar hidden">
+      <div class="raw-label">Raw METAR</div>
+      <div class="raw-text" id="raw-metar-text">—</div>
+    </div>
+  </div>
+
+  <script src="/cockpit.js"></script>
 </body>
 </html>

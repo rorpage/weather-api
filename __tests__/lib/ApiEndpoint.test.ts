@@ -25,6 +25,13 @@ class TestEndpoint extends ApiEndpoint {
   }
 }
 
+// Public endpoint that skips auth
+class PublicTestEndpoint extends TestEndpoint {
+  protected requiresAuth(): boolean {
+    return false;
+  }
+}
+
 function createMockRequest(overrides: Partial<VercelRequest> = {}): VercelRequest {
   return {
     method: 'GET',
@@ -142,6 +149,17 @@ describe('ApiEndpoint', () => {
       expect(response.json).toHaveBeenCalledWith({
         error: 'Server configuration error: API token not set',
       });
+    });
+
+    it('should skip auth when requiresAuth returns false', async () => {
+      const endpoint = new PublicTestEndpoint();
+      const request = createMockRequest({ headers: {} });
+      const response = createMockResponse();
+
+      await endpoint.handle(request, response);
+
+      expect(response.status).toHaveBeenCalledWith(200);
+      expect(response.json).toHaveBeenCalledWith({ success: true });
     });
   });
 

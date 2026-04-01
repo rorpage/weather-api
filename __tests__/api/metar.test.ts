@@ -28,7 +28,7 @@ import handler from '../../api/metar';
 function createMockRequest(overrides: Partial<VercelRequest> = {}): VercelRequest {
   return {
     method: 'GET',
-    headers: { 'x-api-token': 'test-token' },
+    headers: {},
     query: {},
     body: undefined,
     url: '/api/metar',
@@ -46,15 +46,11 @@ function createMockResponse(): VercelResponse {
 }
 
 describe('metar endpoint', () => {
-  const originalEnv = process.env;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env = { ...originalEnv, API_TOKEN: 'test-token' };
   });
 
   afterEach(() => {
-    process.env = originalEnv;
     vi.clearAllMocks();
   });
 
@@ -369,17 +365,6 @@ describe('metar endpoint', () => {
       expect(response.json).toHaveBeenCalledWith({
         error: 'Method not allowed',
       });
-    });
-
-    it('should reject requests with invalid token', async () => {
-      const request = createMockRequest({
-        headers: { 'x-api-token': 'wrong-token' },
-      });
-      const response = createMockResponse();
-
-      await handler(request, response);
-
-      expect(response.status).toHaveBeenCalledWith(401);
     });
   });
 
