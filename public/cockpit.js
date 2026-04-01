@@ -2,18 +2,18 @@ const AIRPORT_KEY = 'metar_airport';
 
 // Dark shade of each category color — used for the outer ring of the FC gauge
 const FC_COLORS_DARK = {
-  VFR: '#15803d',
+  VFR: '#0C4C24',  // contrast 10.77:1 with white
   MVFR: '#1d4ed8',
   IFR: '#b91c1c',
   LIFR: '#a21caf',
 };
 
-// Lighter pastel tint of each category color for the inner circle background
+// Slightly lighter (but still WCAG AA with white text) inner-circle fill
 const FC_COLORS_LIGHT = {
-  VFR: '#86efac',
-  MVFR: '#93c5fd',
-  IFR: '#fca5a5',
-  LIFR: '#f0abfc',
+  VFR: '#15803d',  // contrast 5.01:1 with white
+  MVFR: '#2563eb', // contrast 5.17:1 with white
+  IFR: '#dc2626',  // contrast 4.83:1 with white
+  LIFR: '#c026d3', // contrast 4.71:1 with white
 };
 
 function fcColorDark(category) {
@@ -88,6 +88,8 @@ function renderTemp(svg, tempC) {
     'font-size': 24,
     'font-weight': 'bold',
   }));
+
+  svg.setAttribute('aria-label', `Temperature: ${display}`);
 }
 
 // ── WIND GAUGE ─────────────────────────────────────
@@ -163,6 +165,7 @@ function renderWind(svg, windDirection, windSpeed) {
       cx: 100, cy: 100, r: 8,
       stroke: '#fff', 'stroke-width': 2, fill: 'none',
     }));
+    svg.setAttribute('aria-label', 'Wind: Calm');
   } else {
     svg.appendChild(svgText(`${windSpeed} kt`, {
       x: 100, y: 93,
@@ -180,6 +183,7 @@ function renderWind(svg, windDirection, windSpeed) {
       'font-size': 24,
       'font-weight': 'bold',
     }));
+    svg.setAttribute('aria-label', `Wind: ${windSpeed} kt at ${windDirection}°`);
   }
 }
 
@@ -199,10 +203,12 @@ function renderAlt(svg, altimeter) {
     'font-size': 24,
     'font-weight': 'bold',
   }));
+
+  svg.setAttribute('aria-label', `Altimeter: ${display}`);
 }
 
 // ── FLIGHT CATEGORY GAUGE ──────────────────────────
-// Dark colored outer ring with a light pastel center — no gray at all.
+// Dark outer ring + slightly lighter (but still accessible) inner circle.
 function renderFlightCategory(svg, category) {
   clearSvg(svg);
   const colorDark = fcColorDark(category);
@@ -214,7 +220,7 @@ function renderFlightCategory(svg, category) {
     fill: colorDark, stroke: '#000', 'stroke-width': 5,
   }));
 
-  // Light inner circle
+  // Inner circle — uses a darker shade so white text stays accessible
   svg.appendChild(svgEl('circle', {
     cx: 100, cy: 100, r: 87,
     fill: colorLight, stroke: '#000', 'stroke-width': 2,
@@ -230,6 +236,8 @@ function renderFlightCategory(svg, category) {
     'font-size': 24,
     'font-weight': 'bold',
   }));
+
+  svg.setAttribute('aria-label', `Flight Category: ${cat}`);
 }
 
 // ── VISIBILITY GAUGE ───────────────────────────────
@@ -248,6 +256,8 @@ function renderVis(svg, visibility) {
     'font-size': 24,
     'font-weight': 'bold',
   }));
+
+  svg.setAttribute('aria-label', `Visibility: ${display}`);
 }
 
 // ── DEWPOINT GAUGE ─────────────────────────────────
@@ -266,6 +276,8 @@ function renderDew(svg, dewpoint) {
     'font-size': 24,
     'font-weight': 'bold',
   }));
+
+  svg.setAttribute('aria-label', `Dewpoint: ${display}`);
 }
 
 // ── RENDER FULL COCKPIT ────────────────────────────
@@ -273,7 +285,9 @@ function renderCockpit(data) {
   document.getElementById('cockpit-loading').classList.add('hidden');
   document.getElementById('cockpit-error').classList.add('hidden');
 
-  document.getElementById('cockpit-id').textContent = data.id || '----';
+  const cockpitId = document.getElementById('cockpit-id');
+  cockpitId.textContent = data.id || '----';
+  cockpitId.setAttribute('aria-label', `Airport: ${data.id || '----'}`);
   document.getElementById('cockpit-time').textContent = data.observation_time || '--:-- L';
 
   const airportInput = document.getElementById('airport-input');

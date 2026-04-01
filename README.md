@@ -54,6 +54,7 @@ To add a new endpoint:
 The root page (`/`) serves a steam-gauge cockpit instrument panel that displays live METAR aviation weather data. It auto-fetches data on load and remembers the last used airport in `localStorage`.
 
 **Features:**
+
 - Six SVG circle gauges: Flight Category, Temperature, Wind, Altimeter, Visibility, Dewpoint
 - Flight Category gauge uses color-coded rings: VFR (green), MVFR (blue), IFR (red), LIFR (magenta)
 - Wind gauge shows a compass rose with a directional arc tick on the bezel and speed/direction in the center
