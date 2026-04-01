@@ -8,12 +8,12 @@ const FC_COLORS_DARK = {
   LIFR: '#a21caf',
 };
 
-// Lighter pastel tint of each category color for the inner circle background
+// Slightly lighter (but still WCAG AA with white text) inner-circle fill
 const FC_COLORS_LIGHT = {
-  VFR: '#86efac',
-  MVFR: '#93c5fd',
-  IFR: '#fca5a5',
-  LIFR: '#f0abfc',
+  VFR: '#15803d',  // same as dark — no lighter green passes 4.5:1 with white
+  MVFR: '#2563eb', // contrast 5.17:1 with white
+  IFR: '#dc2626',  // contrast 4.83:1 with white
+  LIFR: '#c026d3', // contrast 4.71:1 with white
 };
 
 function fcColorDark(category) {
@@ -208,7 +208,7 @@ function renderAlt(svg, altimeter) {
 }
 
 // ── FLIGHT CATEGORY GAUGE ──────────────────────────
-// Dark colored outer ring with a light pastel center — no gray at all.
+// Dark outer ring + slightly lighter (but still accessible) inner circle.
 function renderFlightCategory(svg, category) {
   clearSvg(svg);
   const colorDark = fcColorDark(category);
@@ -220,7 +220,7 @@ function renderFlightCategory(svg, category) {
     fill: colorDark, stroke: '#000', 'stroke-width': 5,
   }));
 
-  // Light inner circle
+  // Inner circle — uses a darker shade so white text stays accessible
   svg.appendChild(svgEl('circle', {
     cx: 100, cy: 100, r: 87,
     fill: colorLight, stroke: '#000', 'stroke-width': 2,
@@ -231,7 +231,7 @@ function renderFlightCategory(svg, category) {
   svg.appendChild(svgText(cat, {
     x: 100, y: 108,
     'text-anchor': 'middle',
-    fill: '#000',
+    fill: '#fff',
     'font-family': "'Share Tech Mono', monospace",
     'font-size': 24,
     'font-weight': 'bold',
