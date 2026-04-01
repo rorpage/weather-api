@@ -233,7 +233,7 @@
     /* ── INFO STRIP ─────────────────────────────────── */
     .info-strip {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 0.5rem;
       width: 100%;
     }
@@ -346,6 +346,10 @@
 
     <div id="instruments" class="instrument-panel hidden">
       <div class="gauge-wrap">
+        <svg id="gauge-fc" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="gauge-label">Flight Category</div>
+      </div>
+      <div class="gauge-wrap">
         <svg id="gauge-temp" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="gauge-label">Temperature</div>
       </div>
@@ -358,8 +362,8 @@
         <div class="gauge-label">Altimeter</div>
       </div>
       <div class="gauge-wrap">
-        <svg id="gauge-fc" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
-        <div class="gauge-label">Flight Category</div>
+        <svg id="gauge-vis" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="gauge-label">Visibility</div>
       </div>
     </div>
 
@@ -367,10 +371,6 @@
       <div class="info-card">
         <div class="info-label">Sky Conditions</div>
         <div class="info-value" id="sky-text">—</div>
-      </div>
-      <div class="info-card">
-        <div class="info-label">Visibility</div>
-        <div class="info-value" id="visibility-text">—</div>
       </div>
     </div>
 
@@ -508,7 +508,7 @@
           'stroke-width': 8,
           'stroke-dasharray': `${arcLength.toFixed(2)} ${gapLength.toFixed(2)}`,
           transform: `rotate(${rotateAngle}, 100, 100)`,
-          'stroke-linecap': 'round',
+          'stroke-linecap': 'butt',
         }));
       }
 
@@ -642,6 +642,32 @@
       }));
     }
 
+    // ── VISIBILITY GAUGE ───────────────────────────────
+    function renderVis(svg, visibility) {
+      clearSvg(svg);
+      drawBase(svg);
+      drawTicks(svg);
+
+      const display = visibility !== undefined && visibility !== null ? String(visibility) : '--';
+
+      svg.appendChild(svgText(display, {
+        x: 100, y: 108,
+        'text-anchor': 'middle',
+        fill: '#fff',
+        'font-family': "'Share Tech Mono', monospace",
+        'font-size': 52,
+        'font-weight': 'bold',
+      }));
+
+      svg.appendChild(svgText('SM', {
+        x: 100, y: 132,
+        'text-anchor': 'middle',
+        fill: '#bbb',
+        'font-family': "'Figtree', sans-serif",
+        'font-size': 15,
+      }));
+    }
+
     // ── RENDER FULL COCKPIT ────────────────────────────
     function renderCockpit(data) {
       document.getElementById('cockpit-loading').classList.add('hidden');
@@ -661,11 +687,10 @@
       );
       renderAlt(document.getElementById('gauge-alt'), data.altimeter);
       renderFlightCategory(document.getElementById('gauge-fc'), data.flight_category);
+      renderVis(document.getElementById('gauge-vis'), data.visibility);
 
       const skyText = data.sky_conditions?.map((s) => s.description).join('\n') || '—';
       document.getElementById('sky-text').textContent = skyText;
-      document.getElementById('visibility-text').textContent =
-        data.visibility !== undefined ? `${data.visibility} SM` : '—';
       document.getElementById('raw-metar-text').textContent = data.raw_text || '—';
 
       document.getElementById('instruments').classList.remove('hidden');
