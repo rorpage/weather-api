@@ -88,6 +88,8 @@ function renderTemp(svg, tempC) {
     'font-size': 24,
     'font-weight': 'bold',
   }));
+
+  svg.setAttribute('aria-label', `Temperature: ${display}`);
 }
 
 // ── WIND GAUGE ─────────────────────────────────────
@@ -163,6 +165,7 @@ function renderWind(svg, windDirection, windSpeed) {
       cx: 100, cy: 100, r: 8,
       stroke: '#fff', 'stroke-width': 2, fill: 'none',
     }));
+    svg.setAttribute('aria-label', 'Wind: Calm');
   } else {
     svg.appendChild(svgText(`${windSpeed} kt`, {
       x: 100, y: 93,
@@ -180,6 +183,7 @@ function renderWind(svg, windDirection, windSpeed) {
       'font-size': 24,
       'font-weight': 'bold',
     }));
+    svg.setAttribute('aria-label', `Wind: ${windSpeed} kt at ${windDirection}°`);
   }
 }
 
@@ -199,6 +203,8 @@ function renderAlt(svg, altimeter) {
     'font-size': 24,
     'font-weight': 'bold',
   }));
+
+  svg.setAttribute('aria-label', `Altimeter: ${display}`);
 }
 
 // ── FLIGHT CATEGORY GAUGE ──────────────────────────
@@ -225,11 +231,13 @@ function renderFlightCategory(svg, category) {
   svg.appendChild(svgText(cat, {
     x: 100, y: 108,
     'text-anchor': 'middle',
-    fill: '#fff',
+    fill: '#000',
     'font-family': "'Share Tech Mono', monospace",
     'font-size': 24,
     'font-weight': 'bold',
   }));
+
+  svg.setAttribute('aria-label', `Flight Category: ${cat}`);
 }
 
 // ── VISIBILITY GAUGE ───────────────────────────────
@@ -248,6 +256,8 @@ function renderVis(svg, visibility) {
     'font-size': 24,
     'font-weight': 'bold',
   }));
+
+  svg.setAttribute('aria-label', `Visibility: ${display}`);
 }
 
 // ── DEWPOINT GAUGE ─────────────────────────────────
@@ -266,6 +276,8 @@ function renderDew(svg, dewpoint) {
     'font-size': 24,
     'font-weight': 'bold',
   }));
+
+  svg.setAttribute('aria-label', `Dewpoint: ${display}`);
 }
 
 // ── RENDER FULL COCKPIT ────────────────────────────
@@ -273,7 +285,9 @@ function renderCockpit(data) {
   document.getElementById('cockpit-loading').classList.add('hidden');
   document.getElementById('cockpit-error').classList.add('hidden');
 
-  document.getElementById('cockpit-id').textContent = data.id || '----';
+  const cockpitId = document.getElementById('cockpit-id');
+  cockpitId.textContent = data.id || '----';
+  cockpitId.setAttribute('aria-label', `Airport: ${data.id || '----'}`);
   document.getElementById('cockpit-time').textContent = data.observation_time || '--:-- L';
 
   const airportInput = document.getElementById('airport-input');

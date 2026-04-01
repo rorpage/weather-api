@@ -12,44 +12,47 @@
 </head>
 <body>
 
+  <a href="#instruments" class="skip-link">Skip to instruments</a>
+
   <!-- ── COCKPIT ────────────────────────────────────── -->
   <div id="cockpit" class="cockpit">
     <div class="cockpit-header">
-      <h1 id="cockpit-id">----</h1>
+      <h1 id="cockpit-id" aria-label="Airport identifier: loading">----</h1>
       <div class="obs-time" id="cockpit-time">--:-- L</div>
     </div>
 
     <div class="search-bar">
-      <input id="airport-input" class="search-input" type="text" maxlength="4" value="KUMP">
-      <button class="btn-update" onclick="fetchMetar()">Update</button>
+      <label for="airport-input" class="visually-hidden">Airport ICAO code</label>
+      <input id="airport-input" class="search-input" type="text" maxlength="4" value="KUMP" aria-label="Airport ICAO code">
+      <button class="btn-update" onclick="fetchMetar()" aria-label="Fetch METAR">Update</button>
     </div>
 
-    <div id="cockpit-loading" class="status-msg">Loading…</div>
-    <div id="cockpit-error" class="error-msg hidden"></div>
+    <div id="cockpit-loading" class="status-msg" aria-live="polite">Loading…</div>
+    <div id="cockpit-error" class="error-msg hidden" role="alert"></div>
 
-    <div id="instruments" class="instrument-panel hidden">
+    <div id="instruments" class="instrument-panel hidden" tabindex="-1">
       <div class="gauge-wrap">
-        <svg id="gauge-fc" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="gauge-fc" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Flight Category"></svg>
         <div class="gauge-label">Flight Category</div>
       </div>
       <div class="gauge-wrap">
-        <svg id="gauge-temp" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="gauge-temp" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Temperature"></svg>
         <div class="gauge-label">Temperature</div>
       </div>
       <div class="gauge-wrap">
-        <svg id="gauge-wind" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="gauge-wind" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Wind"></svg>
         <div class="gauge-label">Wind</div>
       </div>
       <div class="gauge-wrap">
-        <svg id="gauge-alt" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="gauge-alt" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Altimeter"></svg>
         <div class="gauge-label">Altimeter</div>
       </div>
       <div class="gauge-wrap">
-        <svg id="gauge-vis" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="gauge-vis" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Visibility"></svg>
         <div class="gauge-label">Visibility</div>
       </div>
       <div class="gauge-wrap">
-        <svg id="gauge-dew" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="gauge-dew" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Dewpoint"></svg>
         <div class="gauge-label">Dewpoint</div>
       </div>
     </div>
