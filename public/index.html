@@ -220,7 +220,8 @@
 
     .gauge-wrap {
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
     }
 
     .gauge-wrap svg {
@@ -494,7 +495,7 @@
       if (!isCalm) {
         const arcRadius = 91;
         const circumference = 2 * Math.PI * arcRadius;
-        const arcSpanDeg = 45;
+        const arcSpanDeg = 5;
         const arcLength = (arcSpanDeg / 360) * circumference;
         const gapLength = circumference - arcLength;
         // SVG strokes start at 3 o'clock. Compass 0° = top (12 o'clock).
@@ -644,7 +645,7 @@
       svg.appendChild(svgText(cat, {
         x: 100, y: 108,
         'text-anchor': 'middle',
-        fill: color,
+        fill: '#fff',
         'font-family': "'Share Tech Mono', monospace",
         'font-size': cat.length > 3 ? 28 : 36,
         'font-weight': 'bold',
