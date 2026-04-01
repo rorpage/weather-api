@@ -2,7 +2,7 @@ const AIRPORT_KEY = 'metar_airport';
 
 // Dark shade of each category color — used for the outer ring of the FC gauge
 const FC_COLORS_DARK = {
-  VFR: '#15803d',
+  VFR: '#0C4C24',  // contrast 10.77:1 with white
   MVFR: '#1d4ed8',
   IFR: '#b91c1c',
   LIFR: '#a21caf',
@@ -10,7 +10,7 @@ const FC_COLORS_DARK = {
 
 // Slightly lighter (but still WCAG AA with white text) inner-circle fill
 const FC_COLORS_LIGHT = {
-  VFR: '#15803d',  // same as dark — no lighter green passes 4.5:1 with white
+  VFR: '#15803d',  // contrast 5.01:1 with white
   MVFR: '#2563eb', // contrast 5.17:1 with white
   IFR: '#dc2626',  // contrast 4.83:1 with white
   LIFR: '#c026d3', // contrast 4.71:1 with white
