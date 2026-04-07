@@ -58,7 +58,7 @@ function renderRetro(data) {
       windEl.textContent = 'CALM';
     } else {
       const compass = degreesToCompass(data.wind.direction);
-      windEl.textContent = `${compass} ${data.wind.speed} KT\n@ ${data.wind.direction}°`;
+      windEl.textContent = `${compass} ${data.wind.speed} KT @ ${data.wind.direction}°`;
     }
   } else {
     windEl.textContent = '--';
