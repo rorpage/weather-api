@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "cleanUrls": true,
   "env": {
     "NODE_OPTIONS": "--no-deprecation"
   }

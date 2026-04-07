@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>rorpage Weather API — Retro</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/retro.css">
+</head>
+<body>
+
+  <a href="#ws-main" class="skip-link">Skip to weather data</a>
+
+  <div class="ws-screen">
+
+    <!-- CRT scanline overlay -->
+    <div class="scanlines" aria-hidden="true"></div>
+
+    <!-- TWC-style header bar -->
+    <div class="ws-header">
+      <span class="ws-twc-logo">THE WEATHER CHANNEL</span>
+      <span class="ws-header-tag">LOCAL FORECAST</span>
+    </div>
+
+    <div id="ws-main" class="ws-main">
+
+      <!-- Location + time -->
+      <div class="ws-location-bar">
+        <span class="ws-location-id" id="ws-location-id" aria-label="Airport identifier: loading">----</span>
+        <span class="ws-obs-time" id="ws-obs-time">--:-- LOCAL</span>
+      </div>
+
+      <!-- Section title -->
+      <div class="ws-section-title">CURRENT CONDITIONS</div>
+
+      <!-- Airport search -->
+      <div class="ws-search">
+        <label for="ws-airport-input" class="visually-hidden">Airport ICAO code</label>
+        <input id="ws-airport-input" class="ws-input" type="text" maxlength="4" value="KUMP"
+               aria-label="Airport ICAO code">
+        <button class="ws-btn" onclick="fetchMetarRetro()" aria-label="Fetch METAR">UPDATE</button>
+      </div>
+
+      <!-- Status messages -->
+      <div id="ws-loading" class="ws-status" aria-live="polite">LOADING...</div>
+      <div id="ws-error" class="ws-error hidden" role="alert"></div>
+
+      <!-- Weather data grid -->
+      <div id="ws-data" class="ws-data-grid hidden" tabindex="-1">
+
+        <div class="ws-data-row">
+          <div class="ws-data-cell">
+            <div class="ws-cell-label">TEMPERATURE</div>
+            <div class="ws-cell-value ws-temp" id="ws-temp">--</div>
+          </div>
+          <div class="ws-data-cell">
+            <div class="ws-cell-label">DEWPOINT</div>
+            <div class="ws-cell-value ws-dew" id="ws-dewpoint">--</div>
+          </div>
+        </div>
+
+        <div class="ws-data-row">
+          <div class="ws-data-cell">
+            <div class="ws-cell-label">WIND</div>
+            <div class="ws-cell-value" id="ws-wind">--</div>
+          </div>
+          <div class="ws-data-cell">
+            <div class="ws-cell-label">VISIBILITY</div>
+            <div class="ws-cell-value" id="ws-visibility">--</div>
+          </div>
+        </div>
+
+        <div class="ws-data-row">
+          <div class="ws-data-cell">
+            <div class="ws-cell-label">ALTIMETER</div>
+            <div class="ws-cell-value" id="ws-altimeter">--</div>
+          </div>
+          <div class="ws-data-cell">
+            <div class="ws-cell-label">FLIGHT CATEGORY</div>
+            <div class="ws-cell-value ws-flight-cat" id="ws-flight-cat">--</div>
+          </div>
+        </div>
+
+        <div class="ws-data-row">
+          <div class="ws-data-cell ws-full-cell">
+            <div class="ws-cell-label">SKY CONDITIONS</div>
+            <div class="ws-cell-value ws-sky" id="ws-sky">--</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Scrolling METAR ticker -->
+    <div class="ws-ticker">
+      <span class="ws-ticker-label" aria-hidden="true">METAR</span>
+      <div class="ws-ticker-track" aria-live="polite" aria-label="Raw METAR">
+        <span class="ws-ticker-text" id="ws-ticker-text">AWAITING DATA...</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/retro.js"></script>
+</body>
+</html>
