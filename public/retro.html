@@ -37,12 +37,12 @@
       <div class="ws-section-title">CURRENT CONDITIONS</div>
 
       <!-- Airport search -->
-      <div class="ws-search">
+      <form class="ws-search" onsubmit="fetchMetarRetro(); return false;" aria-label="Airport search">
         <label for="ws-airport-input" class="visually-hidden">Airport ICAO code</label>
         <input id="ws-airport-input" class="ws-input" type="text" maxlength="4" value="KUMP"
                aria-label="Airport ICAO code">
-        <button class="ws-btn" onclick="fetchMetarRetro()" aria-label="Fetch METAR">UPDATE</button>
-      </div>
+        <button class="ws-btn" type="submit" aria-label="Fetch METAR">UPDATE</button>
+      </form>
 
       <!-- Status messages -->
       <div id="ws-loading" class="ws-status" aria-live="polite">LOADING...</div>

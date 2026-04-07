@@ -220,6 +220,17 @@ body {
   50% { opacity: 0; }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .ws-status {
+    animation: none;
+  }
+
+  .ws-ticker-text {
+    animation: none;
+    padding-left: 0.5rem;
+  }
+}
+
 .ws-error {
   text-align: center;
   font-size: 1.4rem;

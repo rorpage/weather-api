@@ -82,19 +82,24 @@ function renderRetro(data) {
   flightCatEl.textContent = category;
   flightCatEl.setAttribute('data-cat', category);
 
-  // Sky conditions
+  // Sky conditions — guard against empty array
   const skyEl = document.getElementById('ws-sky');
   skyEl.textContent =
-    data.sky_conditions?.map((sky) => sky.description.toUpperCase()).join('\n') || 'CLEAR';
+    data.sky_conditions?.length
+      ? data.sky_conditions.map((sky) => sky.description.toUpperCase()).join('\n')
+      : 'CLEAR';
 
-  // METAR ticker — restart the scroll animation on new data
+  // METAR ticker — restart the scroll animation on new data using rAF
   const tickerText = document.getElementById('ws-ticker-text');
   tickerText.textContent = data.raw_text || 'NO METAR DATA';
   tickerText.style.animation = 'none';
-  tickerText.getBoundingClientRect(); // force reflow to restart animation
-  tickerText.style.animation = '';
+  requestAnimationFrame(() => {
+    tickerText.style.animation = '';
+  });
 
-  document.getElementById('ws-data').classList.remove('hidden');
+  const dataGrid = document.getElementById('ws-data');
+  dataGrid.classList.remove('hidden');
+  dataGrid.focus();
 }
 
 // ── FETCH ──────────────────────────────────────────
