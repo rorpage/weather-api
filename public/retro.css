@@ -1,0 +1,388 @@
+/* retro.css — WeatherStar 4000-inspired display */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ── ACCESSIBILITY ──────────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -999px;
+  left: -999px;
+  padding: 0.5rem 1rem;
+  background: #FFD700;
+  color: #000;
+  font-weight: 600;
+  z-index: 1000;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 0;
+  left: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── PAGE ────────────────────────────────────────── */
+body {
+  font-family: 'VT323', 'Courier New', monospace;
+  background: #000033;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+}
+
+/* ── SCREEN ──────────────────────────────────────── */
+.ws-screen {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  background: #000088;
+  border: 4px solid #1a1aff;
+  box-shadow: 0 0 0 2px #000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+}
+
+/* CRT scanline overlay */
+.scanlines {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.18) 3px,
+    rgba(0, 0, 0, 0.18) 4px
+  );
+  z-index: 10;
+}
+
+/* ── HEADER ──────────────────────────────────────── */
+.ws-header {
+  background: linear-gradient(135deg, #cc5500 0%, #ff8c00 50%, #cc5500 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.75rem;
+  border-bottom: 3px solid #ff9900;
+}
+
+.ws-logo {
+  font-size: 1.6rem;
+  color: #fff;
+  letter-spacing: 0.1em;
+}
+
+.ws-header-tag {
+  font-size: 1rem;
+  color: #ffee88;
+  letter-spacing: 0.08em;
+}
+
+/* ── MAIN CONTENT ────────────────────────────────── */
+.ws-main {
+  flex: 1;
+  padding: 0.625rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  background: linear-gradient(180deg, #000088 0%, #000066 100%);
+}
+
+/* ── LOCATION BAR ────────────────────────────────── */
+.ws-location-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  background: #000044;
+  padding: 0.35rem 0.625rem;
+  border: 1px solid #0033cc;
+}
+
+.ws-location-id {
+  font-size: 2.4rem;
+  color: #ffff00;
+  letter-spacing: 0.25em;
+}
+
+.ws-obs-time {
+  font-size: 1.3rem;
+  color: #aaddff;
+  letter-spacing: 0.08em;
+}
+
+/* ── SECTION TITLE ───────────────────────────────── */
+.ws-section-title {
+  text-align: center;
+  font-size: 1.6rem;
+  color: #00ffff;
+  letter-spacing: 0.22em;
+  padding: 0.2rem 0;
+  border-top: 1px solid #005599;
+  border-bottom: 1px solid #005599;
+}
+
+/* ── AIRPORT SEARCH ──────────────────────────────── */
+.ws-search {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.ws-input {
+  background: #000033;
+  border: 2px solid #0055bb;
+  color: #ffff00;
+  font-family: 'VT323', 'Courier New', monospace;
+  font-size: 1.6rem;
+  padding: 0.15rem 0.5rem;
+  width: 6.5rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  transition: border-color 0.15s;
+}
+
+.ws-input:focus {
+  border-color: #0099ff;
+  outline: none;
+}
+
+.ws-input:focus-visible {
+  outline: 2px solid #ffff00;
+  outline-offset: 2px;
+}
+
+.ws-btn {
+  background: #000055;
+  border: 2px solid #0077cc;
+  color: #00ffff;
+  cursor: pointer;
+  font-family: 'VT323', 'Courier New', monospace;
+  font-size: 1.4rem;
+  letter-spacing: 0.12em;
+  padding: 0.15rem 0.875rem;
+  text-transform: uppercase;
+  transition: background 0.1s;
+}
+
+.ws-btn:hover {
+  background: #000088;
+}
+
+.ws-btn:focus-visible {
+  outline: 2px solid #ffff00;
+  outline-offset: 2px;
+}
+
+/* ── STATUS & ERROR ──────────────────────────────── */
+.ws-status {
+  text-align: center;
+  font-size: 1.6rem;
+  color: #ffff00;
+  letter-spacing: 0.12em;
+  padding: 1rem 0;
+  animation: blink-anim 1s step-end infinite;
+}
+
+@keyframes blink-anim {
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-status {
+    animation: none;
+  }
+
+  .ws-ticker-text {
+    animation: none;
+    padding-left: 0.5rem;
+  }
+}
+
+.ws-error {
+  text-align: center;
+  font-size: 1.4rem;
+  color: #ff5555;
+  letter-spacing: 0.06em;
+  padding: 0.75rem;
+  border: 2px solid #ff5555;
+  background: #220000;
+}
+
+/* ── DATA GRID ───────────────────────────────────── */
+.ws-data-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ws-data-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.ws-data-cell {
+  background: #000055;
+  border: 1px solid #0044aa;
+  padding: 0.4rem 0.625rem 0.45rem;
+  min-height: 4.5rem;
+}
+
+.ws-full-cell {
+  grid-column: 1 / -1;
+  min-height: 3.5rem;
+}
+
+.ws-cell-label {
+  font-size: 0.9rem;
+  color: #ffd700;
+  letter-spacing: 0.14em;
+  border-bottom: 1px solid #003388;
+  padding-bottom: 0.15rem;
+  margin-bottom: 0.25rem;
+}
+
+.ws-cell-value {
+  font-size: 1.75rem;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  white-space: pre-line;
+}
+
+/* Temperature — warm amber */
+.ws-temp {
+  color: #ff9944;
+}
+
+/* Dewpoint — cool cyan */
+.ws-dew {
+  color: #44ddff;
+}
+
+/* Sky conditions — slightly smaller so multi-line fits */
+.ws-sky {
+  font-size: 1.3rem;
+  line-height: 1.35;
+}
+
+/* ── FLIGHT CATEGORY COLORS ──────────────────────── */
+.ws-flight-cat[data-cat='VFR'] {
+  color: #00ff44;
+}
+
+.ws-flight-cat[data-cat='MVFR'] {
+  color: #44aaff;
+}
+
+.ws-flight-cat[data-cat='IFR'] {
+  color: #ff4444;
+}
+
+.ws-flight-cat[data-cat='LIFR'] {
+  color: #ff44ff;
+}
+
+/* ── SCROLLING METAR TICKER ──────────────────────── */
+.ws-ticker {
+  display: flex;
+  align-items: center;
+  background: #000022;
+  border-top: 3px solid #ff8800;
+  height: 2.4rem;
+  overflow: hidden;
+}
+
+.ws-ticker-label {
+  flex-shrink: 0;
+  padding: 0 0.625rem;
+  font-size: 1.1rem;
+  color: #ff8800;
+  letter-spacing: 0.12em;
+  border-right: 2px solid #ff8800;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.ws-ticker-track {
+  flex: 1;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.ws-ticker-text {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 1.1rem;
+  color: #ffff00;
+  letter-spacing: 0.08em;
+  padding-left: 100%;
+  animation: ticker-scroll 22s linear infinite;
+}
+
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+
+/* ── UTILITY ─────────────────────────────────────── */
+.hidden {
+  display: none !important;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 480px) {
+  body {
+    padding: 0;
+  }
+
+  .ws-screen {
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+    box-shadow: none;
+    max-width: 100%;
+  }
+
+  .ws-logo {
+    font-size: 1.3rem;
+  }
+
+  .ws-header-tag {
+    font-size: 0.85rem;
+  }
+
+  .ws-location-id {
+    font-size: 2rem;
+  }
+
+  .ws-cell-value {
+    font-size: 1.5rem;
+  }
+}
+
