@@ -2,19 +2,8 @@
 
 const RETRO_AIRPORT_KEY = 'retro_metar_airport';
 
-const COMPASS_POINTS = [
-  'N', 'NNE', 'NE', 'ENE',
-  'E', 'ESE', 'SE', 'SSE',
-  'S', 'SSW', 'SW', 'WSW',
-  'W', 'WNW', 'NW', 'NNW',
-];
-
 function celsiusToFahrenheit(celsius) {
   return Math.round(celsius * 9 / 5 + 32);
-}
-
-function degreesToCompass(degrees) {
-  return COMPASS_POINTS[Math.round(degrees / 22.5) % 16];
 }
 
 // ── RENDER ─────────────────────────────────────────
@@ -50,15 +39,14 @@ function renderRetro(data) {
     dewEl.textContent = '--';
   }
 
-  // Wind — direction as compass + speed, or CALM
+  // Wind — speed and direction in degrees, or CALM
   const windEl = document.getElementById('ws-wind');
   if (data.wind) {
     const isCalm = data.wind.direction === 0 && data.wind.speed === 0;
     if (isCalm) {
       windEl.textContent = 'CALM';
     } else {
-      const compass = degreesToCompass(data.wind.direction);
-      windEl.textContent = `${compass} ${data.wind.speed} KT @ ${data.wind.direction}°`;
+      windEl.textContent = `${data.wind.speed} KT @ ${data.wind.direction}°`;
     }
   } else {
     windEl.textContent = '--';
