@@ -379,6 +379,60 @@ curl -H "x-api-token: your_token_here" \
 
 > **Note:** Both NWS endpoints use the [National Weather Service API](https://api.weather.gov) which only covers US locations. No API key required — NWS data is free and public.
 
+### LLM Tools Endpoint
+
+**Endpoint:** `/api/tools`
+
+**Method:** `GET`
+
+> **Authentication:** None required — this endpoint is publicly accessible without an `x-api-token` header.
+
+Returns Anthropic-compatible tool definitions for all weather endpoints. Use this with the [Anthropic API](https://docs.anthropic.com/en/docs/tool-use) to give a Claude model access to live weather data.
+
+**Example Request:**
+
+```bash
+curl "http://localhost:3000/api/tools"
+```
+
+**Response:**
+
+```json
+{
+  "tools": [
+    {
+      "name": "get_current_weather",
+      "description": "Get current weather conditions and a daily summary for a location...",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "latitude": { "type": "string", "description": "Latitude of the location (e.g. \"39.7684\")" },
+          "longitude": { "type": "string", "description": "Longitude of the location (e.g. \"-86.1581\")" },
+          "units": { "type": "string", "description": "...", "enum": ["metric", "imperial", "standard"] }
+        },
+        "required": ["latitude", "longitude"]
+      }
+    },
+    { "name": "get_aviation_metar", "...": "..." },
+    { "name": "get_nws_current_conditions", "...": "..." },
+    { "name": "get_nws_hourly_forecast", "...": "..." }
+  ]
+}
+```
+
+**Available tools:**
+
+| Tool name | Wraps endpoint | Required inputs |
+|---|---|---|
+| `get_current_weather` | `/api/weather` | `latitude`, `longitude` (optional: `units`) |
+| `get_aviation_metar` | `/api/metar` | none (optional: `id`) |
+| `get_nws_current_conditions` | `/api/nws-current` | `latitude`, `longitude` |
+| `get_nws_hourly_forecast` | `/api/nws-forecast` | `latitude`, `longitude` |
+
+**Usage with Anthropic API:**
+
+Fetch the tool definitions and pass them directly to the `tools` parameter of a Claude API request. When Claude calls a tool, proxy the `input` object as query parameters to the corresponding endpoint (adding your `x-api-token` header for authenticated endpoints).
+
 ## Deployment
 
 Deploy to Vercel:
