@@ -15,18 +15,25 @@ This project uses a clean, modular architecture:
 
 ```
 api/
-  weather.ts          # Weather endpoint (extends ApiEndpoint)
-  metar.ts            # METAR endpoint (extends ApiEndpoint)
+  weather.ts          # OpenWeatherMap current weather (auth required)
+  metar.ts            # Garmin aviation METAR data (public)
+  nws-current.ts      # NWS current conditions (auth required)
+  nws-forecast.ts     # NWS 12-hour hourly forecast (auth required)
+  tools.ts            # Anthropic-compatible tool definitions (public)
+  health.ts           # Health check (public)
 lib/
   ApiEndpoint.ts      # Base class for all endpoints
   middleware.ts       # Validation utilities
 services/
   OpenWeatherMapService.ts  # OWM API client
-  GarminService.ts          # Garmin API client
+  GarminService.ts          # Garmin aviation data client
+  NWSService.ts             # National Weather Service API client
 models/
   common/             # Shared models (ValidationError)
   weather/            # Weather-specific models
   metar/              # METAR-specific models
+  nws/                # NWS-specific models
+  tools/              # Tool definition models
 ```
 
 ### Adding New Endpoints
