@@ -441,9 +441,19 @@ curl "http://localhost:3000/api/tools"
       "input_schema": {
         "type": "object",
         "properties": {
-          "latitude": { "type": "string", "description": "Latitude of the location (e.g. \"39.7684\")" },
-          "longitude": { "type": "string", "description": "Longitude of the location (e.g. \"-86.1581\")" },
-          "units": { "type": "string", "description": "...", "enum": ["metric", "imperial", "standard"] }
+          "latitude": {
+            "type": "string",
+            "description": "Latitude of the location (e.g. \"39.7684\")"
+          },
+          "longitude": {
+            "type": "string",
+            "description": "Longitude of the location (e.g. \"-86.1581\")"
+          },
+          "units": {
+            "type": "string",
+            "description": "...",
+            "enum": ["metric", "imperial", "standard"]
+          }
         },
         "required": ["latitude", "longitude"]
       }
@@ -457,12 +467,12 @@ curl "http://localhost:3000/api/tools"
 
 **Available tools:**
 
-| Tool name | Wraps endpoint | Required inputs |
-|---|---|---|
-| `get_current_weather` | `/api/weather` | `latitude`, `longitude` (optional: `units`) |
-| `get_aviation_metar` | `/api/metar` | none (optional: `id`) |
-| `get_nws_current_conditions` | `/api/nws-current` | `latitude`, `longitude` |
-| `get_nws_hourly_forecast` | `/api/nws-forecast` | `latitude`, `longitude` |
+| Tool name                    | Wraps endpoint      | Required inputs                             |
+| ---------------------------- | ------------------- | ------------------------------------------- |
+| `get_current_weather`        | `/api/weather`      | `latitude`, `longitude` (optional: `units`) |
+| `get_aviation_metar`         | `/api/metar`        | none (optional: `id`)                       |
+| `get_nws_current_conditions` | `/api/nws-current`  | `latitude`, `longitude`                     |
+| `get_nws_hourly_forecast`    | `/api/nws-forecast` | `latitude`, `longitude`                     |
 
 **Usage with Anthropic API:**
 
