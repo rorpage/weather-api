@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { OpenWeatherMapService } from '../../services/OpenWeatherMapService';
 import type { WeatherResponse } from '../../models/weather/WeatherResponse';
+import type { GeocodingResponse } from '../../models/weather/GeocodingResponse';
 
 describe('OpenWeatherMapService', () => {
   const originalEnv = process.env;
@@ -206,6 +207,97 @@ describe('OpenWeatherMapService', () => {
       const service = new OpenWeatherMapService();
 
       await expect(service.getCurrentWeather('40.7', '-74.0')).rejects.toThrow('Network error');
+    });
+  });
+
+  describe('getCoordinatesFromZip', () => {
+    const mockGeocodingResponse: GeocodingResponse = {
+      zip: '10001',
+      name: 'New York',
+      lat: 40.7484,
+      lon: -73.9967,
+      country: 'US',
+    };
+
+    it('should fetch coordinates for a zip code', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => mockGeocodingResponse,
+      });
+
+      const service = new OpenWeatherMapService();
+      const result = await service.getCoordinatesFromZip('10001');
+
+      expect(result).toEqual(mockGeocodingResponse);
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('https://api.openweathermap.org/geo/1.0/zip')
+      );
+    });
+
+    it('should default to US as the country code', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => mockGeocodingResponse,
+      });
+
+      const service = new OpenWeatherMapService();
+      await service.getCoordinatesFromZip('10001');
+
+      const calledUrl = mockFetch.mock.calls[0][0] as string;
+      expect(calledUrl).toContain('zip=10001%2CUS');
+      expect(calledUrl).toContain('appid=test-api-key');
+    });
+
+    it('should use a provided country code', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => mockGeocodingResponse,
+      });
+
+      const service = new OpenWeatherMapService();
+      await service.getCoordinatesFromZip('90210', 'CA');
+
+      const calledUrl = mockFetch.mock.calls[0][0] as string;
+      expect(calledUrl).toContain('zip=90210%2CCA');
+    });
+
+    it('should handle array parameters by taking first element', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => mockGeocodingResponse,
+      });
+
+      const service = new OpenWeatherMapService();
+      await service.getCoordinatesFromZip(['10001', '90210']);
+
+      const calledUrl = mockFetch.mock.calls[0][0] as string;
+      expect(calledUrl).toContain('zip=10001%2CUS');
+    });
+
+    it('should throw error on failed API response', async () => {
+      const errorResponse = {
+        cod: 404,
+        message: 'not found',
+      };
+
+      mockFetch.mockResolvedValue({
+        ok: false,
+        json: async () => errorResponse,
+      });
+
+      const service = new OpenWeatherMapService();
+
+      await expect(service.getCoordinatesFromZip('00000')).rejects.toThrow(
+        'Failed to fetch coordinates for zip code'
+      );
+    });
+
+    it('should handle network errors', async () => {
+      mockFetch.mockRejectedValue(new Error('Network error'));
+
+      const service = new OpenWeatherMapService();
+
+      await expect(service.getCoordinatesFromZip('10001')).rejects.toThrow('Network error');
     });
   });
 });

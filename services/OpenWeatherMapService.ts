@@ -1,4 +1,5 @@
 import type { WeatherResponse } from '../models/weather/WeatherResponse';
+import type { GeocodingResponse } from '../models/weather/GeocodingResponse';
 
 export class OpenWeatherMapService {
   private apiKey: string;
@@ -37,5 +38,28 @@ export class OpenWeatherMapService {
     }
 
     return (await response.json()) as WeatherResponse;
+  }
+
+  /**
+   * Resolve a zip/postal code to coordinates using the OpenWeatherMap Geocoding API
+   */
+  async getCoordinatesFromZip(
+    zip: string | string[],
+    countryCode: string = 'US'
+  ): Promise<GeocodingResponse> {
+    const zipValue = Array.isArray(zip) ? zip[0] : zip;
+
+    const url = new URL('https://api.openweathermap.org/geo/1.0/zip');
+    url.searchParams.set('zip', `${zipValue},${countryCode}`);
+    url.searchParams.set('appid', this.apiKey);
+
+    const response = await fetch(url.toString());
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Failed to fetch coordinates for zip code: ${JSON.stringify(errorData)}`);
+    }
+
+    return (await response.json()) as GeocodingResponse;
   }
 }

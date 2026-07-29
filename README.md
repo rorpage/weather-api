@@ -15,7 +15,9 @@ This project uses a clean, modular architecture:
 
 ```
 api/
-  weather.ts          # OpenWeatherMap current weather (auth required)
+  weather.ts          # OpenWeatherMap current weather by coordinates (auth required)
+  weather/
+    zip.ts            # OpenWeatherMap current weather by zip code (auth required)
   metar.ts            # Garmin aviation METAR data (public)
   nws-current.ts      # NWS current conditions (auth required)
   nws-forecast.ts     # NWS 12-hour hourly forecast (auth required)
@@ -24,6 +26,7 @@ api/
 lib/
   ApiEndpoint.ts      # Base class for all endpoints
   middleware.ts       # Validation utilities
+  weatherFormatters.ts # Shared OWM response formatting
 services/
   OpenWeatherMapService.ts  # OWM API client
   GarminService.ts          # Garmin aviation data client
@@ -221,6 +224,31 @@ curl -H "x-api-token: your_token_here" \
 - `message` (string): Today's forecast with high, low, and conditions
 - `title` (string): Current conditions summary with feels-like temperature
 - `temperature` (number): Current temperature as an integer (rounded)
+
+### Weather by Zip Code Endpoint
+
+**Endpoint:** `/api/weather/zip`
+
+**Method:** `GET`
+
+**Headers:**
+
+- `x-api-token` (required): API token for authentication
+
+**Query Parameters:**
+
+- `zip` (required): Zip or postal code
+- `country` (optional): ISO 3166 country code. Default: `US`
+- `units` (optional): Units of measurement (`standard`, `metric`, or `imperial`). Default: `metric`
+
+**Example Request:**
+
+```bash
+curl -H "x-api-token: your_token_here" \
+  "http://localhost:3000/api/weather/zip?zip=10001&units=imperial"
+```
+
+**Response:** Same shape as [`/api/weather`](#weather-endpoint) — the zip code is resolved to coordinates via OpenWeatherMap's Geocoding API before fetching weather data.
 
 ### METAR Endpoint
 
