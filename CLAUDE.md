@@ -257,3 +257,8 @@ After **any** code addition or modification, always do the following automatical
 - **Single responsibility**: Endpoints only transform data; services handle external communication
 - **Token authentication**: Simple token-based auth via headers (not OAuth/JWT)
 - **Node 24+ required**: Uses modern Node.js features and native fetch API
+- **Data sourcing**: Never use a FOX-affiliated TV station as a data source, regardless of technical feasibility
+
+## Documentation Style
+
+- README.md documents public API behavior only — never name the specific upstream provider, company, or TV station a given data source comes from. Keep descriptions generic (e.g., "regional weather feed" rather than naming the station or network).

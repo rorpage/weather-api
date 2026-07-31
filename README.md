@@ -18,6 +18,7 @@ api/
   weather.ts          # OpenWeatherMap current weather by coordinates (auth required)
   weather/
     zip.ts            # OpenWeatherMap current weather by zip code (auth required)
+    local.ts          # Local news station current conditions + hourly forecast (public)
   metar.ts            # Garmin aviation METAR data (public)
   nws-current.ts      # NWS current conditions (auth required)
   nws-forecast.ts     # NWS 12-hour hourly forecast (auth required)
@@ -27,16 +28,23 @@ lib/
   ApiEndpoint.ts      # Base class for all endpoints
   middleware.ts       # Validation utilities
   weatherFormatters.ts # Shared OWM response formatting
+  tegnaFormatters.ts  # Shared response formatting for one regional weather feed
+  grayFormatters.ts   # Shared response formatting for another regional weather feed
 services/
   OpenWeatherMapService.ts  # OWM API client
   GarminService.ts          # Garmin aviation data client
   NWSService.ts             # National Weather Service API client
+  TegnaStationService.ts    # Regional weather feed API client
+  GrayStationService.ts     # Regional weather feed API client
 models/
   common/             # Shared models (ValidationError)
   weather/            # Weather-specific models
   metar/              # METAR-specific models
   nws/                # NWS-specific models
   tools/              # Tool definition models
+  tegna/              # Models for one regional weather feed
+  gray/               # Models for another regional weather feed
+  localWeather/       # Shared output shape for /api/weather/local across providers
 ```
 
 ### Adding New Endpoints
@@ -249,6 +257,111 @@ curl -H "x-api-token: your_token_here" \
 ```
 
 **Response:** Same shape as [`/api/weather`](#weather-endpoint) — the zip code is resolved to coordinates via OpenWeatherMap's Geocoding API before fetching weather data.
+
+### Local News Weather Endpoint
+
+**Endpoint:** `/api/weather/local`
+
+**Method:** `GET`
+
+> **Authentication:** None required — this endpoint is publicly accessible without an `x-api-token` header.
+
+**Query Parameters:**
+
+- `city` (optional): Which local news feed to pull from. Default: `indianapolis`
+  - `indianapolis`
+  - `minneapolis`
+  - `san_antonio`
+  - `madison`
+
+**Example Request:**
+
+```bash
+curl "http://localhost:3000/api/weather/local?city=minneapolis"
+```
+
+**Response:**
+
+```json
+{
+  "current": {
+    "summary": "Clear",
+    "icon_url": "https://example.com/assets/weather-icons/partly-cloudy-night_210x210.png",
+    "humidity": 87,
+    "temperature": 63,
+    "feels_like": 63,
+    "wind_speed": 3,
+    "wind_direction": "NNW",
+    "precipitation_chance": 0,
+    "precipitation_type": "none",
+    "is_daytime": false,
+    "observed_at": "2026-07-30T06:16:08"
+  },
+  "hourly": [
+    {
+      "summary": "Sunny",
+      "icon_url": "https://example.com/assets/weather-icons/clear-day_210x210.png",
+      "humidity": 86,
+      "temperature": 62,
+      "feels_like": 62,
+      "wind_speed": 3,
+      "wind_direction": "N",
+      "precipitation_chance": 7,
+      "precipitation_type": "Rain",
+      "is_daytime": true,
+      "hour": "7 AM",
+      "day_of_week": "Thu"
+    }
+  ]
+}
+```
+
+- `current` (object): Current conditions for the selected city
+- `hourly` (array): Hourly forecast periods, same shape as `current` but with `hour`/`day_of_week` instead of `observed_at`
+- `icon_url` (string, optional): Absolute URL to a 210x210 condition icon. Not every city's feed provides one, so it's omitted rather than faked where unavailable
+- `precipitation_chance` / `precipitation_type` (optional): Present for all `hourly` periods, but not every city's feed exposes a "right now" precipitation chance for `current`
+- `observed_at` (string, optional): Local timestamp of the current observation, where the feed provides one
+- Non-weather sections (breaking news, closings, video feeds) and other noise are stripped out for every city
+- An unrecognized `city` returns a 500 with a message listing the supported cities
+
+**Example Request (a lighter-weight city feed):**
+
+```bash
+curl "http://localhost:3000/api/weather/local?city=madison"
+```
+
+**Response (a lighter-weight city feed — note the omitted fields):**
+
+```json
+{
+  "current": {
+    "summary": "Mostly Cloudy",
+    "humidity": 45,
+    "temperature": 81,
+    "feels_like": 81,
+    "wind_speed": 9,
+    "wind_direction": "S",
+    "is_daytime": true
+  },
+  "hourly": [
+    {
+      "summary": "Partly Cloudy",
+      "humidity": 57,
+      "temperature": 76,
+      "feels_like": 76,
+      "wind_speed": 4,
+      "wind_direction": "SSW",
+      "is_daytime": false,
+      "precipitation_chance": 1,
+      "precipitation_type": "rain",
+      "hour": "9 PM",
+      "day_of_week": "Thursday"
+    }
+  ]
+}
+```
+
+> **Note:** Not every supported city pulls from the same upstream feed, which is why the response shape varies slightly — some include icon images and a same-moment precipitation chance, others provide a longer hourly window but omit those two fields. A couple of other cities were investigated but aren't included yet: for one, the only easily reachable feed belongs to the wrong network; for another, the desired network's own feed blocks server-side requests outright.
 
 ### METAR Endpoint
 
