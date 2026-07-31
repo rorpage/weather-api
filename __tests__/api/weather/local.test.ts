@@ -217,6 +217,40 @@ describe('weather/local endpoint', () => {
       expect(response.status).toHaveBeenCalledWith(200);
     });
 
+    it('should limit hourly periods to 5 regardless of how many the feed returns', async () => {
+      const period = mockHeaderResponse.weather.hourly[0];
+      mockGetHeaderData.mockResolvedValue({
+        weather: {
+          ...mockHeaderResponse.weather,
+          hourly: Array.from({ length: 8 }, () => period),
+        },
+      });
+
+      const request = createMockRequest();
+      const response = createMockResponse();
+
+      await handler(request, response);
+
+      expect(vi.mocked(response.json).mock.calls[0][0].hourly).toHaveLength(5);
+    });
+
+    it('should limit hourly periods to 5 for the Gray provider too', async () => {
+      const period = mockGrayResponse.imperial.hourlyForecast[0];
+      mockGetWeatherData.mockResolvedValue({
+        imperial: {
+          ...mockGrayResponse.imperial,
+          hourlyForecast: Array.from({ length: 8 }, () => period),
+        },
+      });
+
+      const request = createMockRequest({ query: { city: 'madison' } });
+      const response = createMockResponse();
+
+      await handler(request, response);
+
+      expect(vi.mocked(response.json).mock.calls[0][0].hourly).toHaveLength(5);
+    });
+
     it('should fetch Madison data from the Gray provider when city=madison', async () => {
       mockGetWeatherData.mockResolvedValue(mockGrayResponse);
 

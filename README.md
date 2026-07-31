@@ -317,7 +317,7 @@ curl "http://localhost:3000/api/weather/local?city=minneapolis"
 ```
 
 - `current` (object): Current conditions for the selected city
-- `hourly` (array): Hourly forecast periods, same shape as `current` but with `hour`/`day_of_week` instead of `observed_at`
+- `hourly` (array): Next 5 hourly forecast periods, same shape as `current` but with `hour`/`day_of_week` instead of `observed_at`
 - `icon_url` (string, optional): Absolute URL to a 210x210 condition icon. Not every city's feed provides one, so it's omitted rather than faked where unavailable
 - `precipitation_chance` / `precipitation_type` (optional): Present for all `hourly` periods, but not every city's feed exposes a "right now" precipitation chance for `current`
 - `observed_at` (string, optional): Local timestamp of the current observation, where the feed provides one

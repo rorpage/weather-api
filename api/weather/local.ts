@@ -7,6 +7,7 @@ import { formatGrayOutput } from '../../lib/grayFormatters';
 import type { LocalWeatherOutput } from '../../models/localWeather/LocalWeatherOutput';
 
 const DEFAULT_CITY = 'indianapolis';
+const HOURLY_LIMIT = 5;
 
 const CITY_STATIONS: Record<string, { provider: 'tegna' | 'gray'; host: string }> = {
   indianapolis: { provider: 'tegna', host: 'www.wthr.com' },
@@ -44,15 +45,15 @@ class LocalWeatherEndpoint extends ApiEndpoint {
       );
     }
 
-    if (station.provider === 'gray') {
-      const weatherData = await this.grayService.getWeatherData(station.host);
+    const output =
+      station.provider === 'gray'
+        ? formatGrayOutput(await this.grayService.getWeatherData(station.host))
+        : formatTegnaOutput(
+            (await this.tegnaService.getHeaderData(station.host)).weather,
+            station.host
+          );
 
-      return formatGrayOutput(weatherData);
-    }
-
-    const headerData = await this.tegnaService.getHeaderData(station.host);
-
-    return formatTegnaOutput(headerData.weather, station.host);
+    return { ...output, hourly: output.hourly.slice(0, HOURLY_LIMIT) };
   }
 }
 
