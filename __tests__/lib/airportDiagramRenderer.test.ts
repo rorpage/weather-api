@@ -82,7 +82,7 @@ describe('buildAirportDiagramSvg', () => {
     const svg = buildAirportDiagramSvg(buildRunways());
 
     expect(svg).toMatch(/<text[^>]*fill="white"[^>]*>07</);
-    expect(svg).toContain('font-family="DejaVu Sans Mono"');
+    expect(svg).toContain('font-family="B612 Mono"');
   });
 
   it('color-codes favorable ends differently from not-favorable ends', () => {

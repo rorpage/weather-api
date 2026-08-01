@@ -7,10 +7,12 @@ const PADDING = 40;
 const END_MARKER_RADIUS = 14;
 const EARTH_RADIUS_METERS = 6371000;
 const RENDER_SCALE = 8;
-const FONT_FAMILY = 'DejaVu Sans Mono';
+// B612 Mono: the monospace font Airbus commissioned for cockpit displays,
+// bundled by Chaplin for its own aviation UI (SIL Open Font License).
+const FONT_FAMILY = 'B612 Mono';
 // Vercel's serverless runtime has no system fonts installed, so resvg-js needs
 // a font file bundled and loaded explicitly, or all SVG text renders blank.
-const FONT_FILE_PATH = path.join(__dirname, '..', 'assets', 'fonts', 'DejaVuSansMono-Bold.ttf');
+const FONT_FILE_PATH = path.join(__dirname, '..', 'assets', 'fonts', 'B612Mono-Bold.ttf');
 
 export type DiagramTheme = 'light' | 'dark';
 
