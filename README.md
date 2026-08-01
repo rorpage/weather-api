@@ -79,7 +79,7 @@ The root page (`/`) serves a steam-gauge cockpit instrument panel that displays 
 - Sky conditions info strip and full raw METAR string displayed below the gauges
 - No authentication required — calls the public `/api/metar` endpoint directly
 
-The cockpit HTML is in `public/index.html`, all styles live in `public/cockpit.css`, and all gauge rendering logic lives in `public/cockpit.js`.
+The cockpit HTML is in `public/index.html`, all styles live in `public/cockpit.css`, and gauge rendering lives in `public/cockpit.js` (DOM/SVG wiring) plus `public/gaugeFormatting.js` (pure color, formatting, and geometry helpers, unit tested).
 
 ## Setup
 
