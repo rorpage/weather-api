@@ -45,7 +45,7 @@ export abstract class ApiEndpoint {
 
       const data = await this.process(request);
 
-      return response.status(200).json(data);
+      return this.writeResponse(response, data);
     } catch (error) {
       console.error(`Error in ${this.constructor.name}:`, error);
 
@@ -54,5 +54,13 @@ export abstract class ApiEndpoint {
         message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
+  }
+
+  /**
+   * Writes the processed data to the response. Defaults to a JSON body;
+   * override to send a different content type (e.g. binary image data).
+   */
+  protected writeResponse(response: VercelResponse, data: unknown): VercelResponse {
+    return response.status(200).json(data);
   }
 }

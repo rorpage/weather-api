@@ -25,6 +25,19 @@ class TestEndpoint extends ApiEndpoint {
   }
 }
 
+// Endpoint that overrides writeResponse to send a custom content type
+class BinaryTestEndpoint extends TestEndpoint {
+  protected writeResponse(response: VercelResponse, data: unknown): VercelResponse {
+    if (Buffer.isBuffer(data)) {
+      response.setHeader('Content-Type', 'application/octet-stream');
+
+      return response.status(200).send(data);
+    }
+
+    return super.writeResponse(response, data);
+  }
+}
+
 // Public endpoint that skips auth
 class PublicTestEndpoint extends TestEndpoint {
   protected requiresAuth(): boolean {
@@ -47,6 +60,8 @@ function createMockResponse(): VercelResponse {
   const response = {
     status: vi.fn().mockReturnThis(),
     json: vi.fn().mockReturnThis(),
+    send: vi.fn().mockReturnThis(),
+    setHeader: vi.fn().mockReturnThis(),
   };
 
   return response as unknown as VercelResponse;
@@ -282,6 +297,45 @@ describe('ApiEndpoint', () => {
 
       // Should fail at method validation first
       expect(response.status).toHaveBeenCalledWith(405);
+    });
+  });
+
+  describe('handle - writeResponse override', () => {
+    it('should default to a JSON body when not overridden', async () => {
+      const mockResult = { temperature: 72 };
+      const endpoint = new TestEndpoint([], async () => mockResult);
+      const request = createMockRequest();
+      const response = createMockResponse();
+
+      await endpoint.handle(request, response);
+
+      expect(response.json).toHaveBeenCalledWith(mockResult);
+      expect(response.send).not.toHaveBeenCalled();
+    });
+
+    it('should allow a subclass to send binary data with a custom content type', async () => {
+      const pngBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+      const endpoint = new BinaryTestEndpoint([], async () => pngBuffer);
+      const request = createMockRequest();
+      const response = createMockResponse();
+
+      await endpoint.handle(request, response);
+
+      expect(response.setHeader).toHaveBeenCalledWith('Content-Type', 'application/octet-stream');
+      expect(response.status).toHaveBeenCalledWith(200);
+      expect(response.send).toHaveBeenCalledWith(pngBuffer);
+      expect(response.json).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to JSON in the overriding subclass for non-buffer data', async () => {
+      const mockResult = { success: true };
+      const endpoint = new BinaryTestEndpoint([], async () => mockResult);
+      const request = createMockRequest();
+      const response = createMockResponse();
+
+      await endpoint.handle(request, response);
+
+      expect(response.json).toHaveBeenCalledWith(mockResult);
     });
   });
 });

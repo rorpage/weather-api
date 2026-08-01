@@ -20,6 +20,7 @@ api/
     zip.ts            # OpenWeatherMap current weather by zip code (auth required)
     local.ts          # NWS current conditions + hourly forecast for a fixed set of cities (public)
   metar.ts            # Garmin aviation METAR data (public)
+  runway-wind.ts      # Runway/wind favorability, as JSON or a PNG diagram (public)
   nws-current.ts      # NWS current conditions (auth required)
   nws-forecast.ts     # NWS 12-hour hourly forecast (auth required)
   tools.ts            # Anthropic-compatible tool definitions (public)
@@ -29,10 +30,13 @@ lib/
   middleware.ts       # Validation utilities
   weatherFormatters.ts # Shared OWM response formatting
   nwsFormatters.ts    # Shared NWS response formatting
+  runwayFormatters.ts # Runway crosswind/headwind/favorability calculation
+  airportDiagramRenderer.ts # Airport diagram SVG builder + PNG rendering
 services/
   OpenWeatherMapService.ts  # OWM API client
   GarminService.ts          # Garmin aviation data client
   NWSService.ts             # National Weather Service API client
+  AopaService.ts            # AOPA runway layout data client
 models/
   common/             # Shared models (ValidationError)
   weather/            # Weather-specific models
@@ -40,6 +44,7 @@ models/
   nws/                # NWS-specific models
   tools/              # Tool definition models
   localWeather/       # Output shape for /api/weather/local, composed from the NWS models
+  runway/             # Runway/wind-specific models
 ```
 
 ### Adding New Endpoints
@@ -368,6 +373,85 @@ curl "http://localhost:3000/api/metar?id=KJFK"
 - `altimeter` (number): Altimeter setting in inHg
 - `flight_category` (string): `"VFR"`, `"MVFR"`, `"IFR"`, or `"LIFR"`
 - `sky_conditions` (array): Cloud layers, each with `coverage`, `base_feet`, and `description`
+
+### Runway Wind Endpoint
+
+**Endpoint:** `/api/runway-wind`
+
+**Method:** `GET`
+
+> **Authentication:** None required — this endpoint is publicly accessible without an `x-api-token` header.
+
+Combines an airport's runway layout with current wind data to score how favorable each runway end is to land on or depart from, and can render the result as either JSON or a PNG airport diagram.
+
+**Query Parameters:**
+
+- `id` (optional): Airport ICAO identifier (e.g., KUMP, KJFK). Default: `KUMP`
+- `format` (optional): `json` or `png`. Default: `json`
+
+**Example Request (JSON):**
+
+```bash
+curl "http://localhost:3000/api/runway-wind?id=KJFK"
+```
+
+**Response:**
+
+```json
+{
+  "airport_id": "KJFK",
+  "airport_name": "John F Kennedy International Airport",
+  "wind_direction_degrees": 270,
+  "wind_speed_knots": 12,
+  "best_runway_identifier": "27",
+  "runways": [
+    {
+      "name": "09/27",
+      "length_feet": 14511,
+      "width_feet": 150,
+      "surface": "Asphalt",
+      "ends": [
+        {
+          "identifier": "09",
+          "heading_degrees": 90,
+          "latitude": 40.6636,
+          "longitude": -73.7967,
+          "crosswind_knots": 12,
+          "headwind_knots": -0.1,
+          "wind_angle_degrees": 180,
+          "favorability": "not_favorable"
+        },
+        {
+          "identifier": "27",
+          "heading_degrees": 270,
+          "latitude": 40.6698,
+          "longitude": -73.7659,
+          "crosswind_knots": 0.1,
+          "headwind_knots": 12,
+          "wind_angle_degrees": 0,
+          "favorability": "very_favorable"
+        }
+      ]
+    }
+  ]
+}
+```
+
+- `airport_id` (string): Airport ICAO identifier
+- `airport_name` (string): Airport name
+- `wind_direction_degrees` (number): Current wind direction in degrees (0–360)
+- `wind_speed_knots` (number): Current wind speed in knots
+- `best_runway_identifier` (string): Identifier of the runway end with the most favorable wind
+- `runways` (array): Each runway's `name`, `length_feet`, `width_feet`, `surface`, and its two `ends`
+- Each runway end includes its `identifier`, true `heading_degrees`, `latitude`/`longitude`, `crosswind_knots`, `headwind_knots` (negative indicates a tailwind component), `wind_angle_degrees` (0–180, angle off the nose), and `favorability` (`"not_favorable"`, `"favorable"`, or `"very_favorable"`)
+
+**Example Request (PNG diagram):**
+
+```bash
+curl "http://localhost:3000/api/runway-wind?id=KJFK&format=png" --output kjfk-runways.png
+```
+
+Returns a `image/png` compass-rose diagram of the airport with each runway drawn between its two ends, color-coded by wind favorability (gray = not favorable, blue = favorable, green = very favorable).
 
 ### NWS Current Conditions Endpoint
 
