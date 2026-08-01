@@ -45,6 +45,8 @@ models/
   tools/              # Tool definition models
   localWeather/       # Output shape for /api/weather/local, composed from the NWS models
   runway/             # Runway/wind-specific models
+assets/
+  fonts/              # Font bundled for PNG rendering (serverless runtimes have no system fonts)
 ```
 
 ### Adding New Endpoints

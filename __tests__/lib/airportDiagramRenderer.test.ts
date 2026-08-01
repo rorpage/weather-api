@@ -78,6 +78,13 @@ describe('buildAirportDiagramSvg', () => {
     expect(svg).toContain('>36<');
   });
 
+  it('gives runway end labels a visible fill and an embeddable font', () => {
+    const svg = buildAirportDiagramSvg(buildRunways());
+
+    expect(svg).toMatch(/<text[^>]*fill="white"[^>]*>07</);
+    expect(svg).toContain('font-family="DejaVu Sans Mono"');
+  });
+
   it('color-codes favorable ends differently from not-favorable ends', () => {
     const svg = buildAirportDiagramSvg(buildRunways());
 
@@ -113,5 +120,13 @@ describe('renderAirportDiagramPng', () => {
 
     expect(Buffer.isBuffer(png)).toBe(true);
     expect(png.subarray(0, 8)).toEqual(pngSignature);
+  });
+
+  it('oversamples the PNG well past the SVG canvas size for a crisp image', () => {
+    const png = renderAirportDiagramPng(buildRunways());
+    // PNG IHDR chunk: width is a big-endian uint32 at byte offset 16.
+    const width = png.readUInt32BE(16);
+
+    expect(width).toBe(1050);
   });
 });

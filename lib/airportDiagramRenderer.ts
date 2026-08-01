@@ -1,3 +1,4 @@
+import path from 'path';
 import { Resvg } from '@resvg/resvg-js';
 import type { RunwayEndOutput, RunwayOutput } from '../models/runway/RunwayWindOutput';
 
@@ -5,6 +6,11 @@ const CANVAS_SIZE = 350;
 const PADDING = 40;
 const END_MARKER_RADIUS = 14;
 const EARTH_RADIUS_METERS = 6371000;
+const RENDER_SCALE = 3;
+const FONT_FAMILY = 'DejaVu Sans Mono';
+// Vercel's serverless runtime has no system fonts installed, so resvg-js needs
+// a font file bundled and loaded explicitly, or all SVG text renders blank.
+const FONT_FILE_PATH = path.join(__dirname, '..', 'assets', 'fonts', 'DejaVuSansMono-Bold.ttf');
 
 interface Point {
   x: number;
@@ -150,9 +156,9 @@ export function buildAirportDiagramSvg(runways: RunwayOutput[]): string {
         <line x1="${lowPoint.x}" y1="${lowPoint.y}" x2="${highPoint.x}" y2="${highPoint.y}" stroke="rgb(75, 85, 99)" stroke-width="10" />
         <line x1="${lowPoint.x}" y1="${lowPoint.y}" x2="${highPoint.x}" y2="${highPoint.y}" stroke="rgb(208, 214, 224)" stroke-dasharray="8,12" stroke-width="1" />
         ${endMarkerSvg(lowPoint, lowEnd.favorability)}
-        <text x="${lowPoint.x}" y="${lowPoint.y + 4}" stroke="white" text-anchor="middle">${lowEnd.identifier}</text>
+        <text x="${lowPoint.x}" y="${lowPoint.y + 4}" fill="white" font-family="${FONT_FAMILY}" font-size="13" font-weight="bold" text-anchor="middle">${lowEnd.identifier}</text>
         ${endMarkerSvg(highPoint, highEnd.favorability)}
-        <text x="${highPoint.x}" y="${highPoint.y + 4}" stroke="white" text-anchor="middle">${highEnd.identifier}</text>
+        <text x="${highPoint.x}" y="${highPoint.y + 4}" fill="white" font-family="${FONT_FAMILY}" font-size="13" font-weight="bold" text-anchor="middle">${highEnd.identifier}</text>
       `;
     })
     .join('');
@@ -161,16 +167,24 @@ export function buildAirportDiagramSvg(runways: RunwayOutput[]): string {
     <circle cx="${center}" cy="${center}" r="${center}" fill="rgb(209, 213, 219)" />
     ${runwayShapes}
     <polygon fill="rgb(22, 163, 74)" points="${center},6 ${center - 7},20 ${center + 7},20" />
-    <text x="${center}" y="35" fill="rgb(22, 163, 74)" font-size="16" font-weight="bold" text-anchor="middle">N</text>
+    <text x="${center}" y="35" fill="rgb(22, 163, 74)" font-family="${FONT_FAMILY}" font-size="16" font-weight="bold" text-anchor="middle">N</text>
   </svg>`;
 }
 
 /**
- * Renders the airport diagram to a PNG buffer.
+ * Renders the airport diagram to a PNG buffer, oversampled to RENDER_SCALE
+ * for a crisp image since the SVG's native size (CANVAS_SIZE) is small.
  */
 export function renderAirportDiagramPng(runways: RunwayOutput[]): Buffer {
   const svg = buildAirportDiagramSvg(runways);
-  const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: CANVAS_SIZE } });
+  const resvg = new Resvg(svg, {
+    fitTo: { mode: 'width', value: CANVAS_SIZE * RENDER_SCALE },
+    font: {
+      fontFiles: [FONT_FILE_PATH],
+      loadSystemFonts: false,
+      defaultFontFamily: FONT_FAMILY,
+    },
+  });
 
   return resvg.render().asPng();
 }
