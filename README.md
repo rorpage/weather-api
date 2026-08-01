@@ -18,7 +18,7 @@ api/
   weather.ts          # OpenWeatherMap current weather by coordinates (auth required)
   weather/
     zip.ts            # OpenWeatherMap current weather by zip code (auth required)
-    local.ts          # Local news station current conditions + hourly forecast (public)
+    local.ts          # NWS current conditions + hourly forecast for a fixed set of cities (public)
   metar.ts            # Garmin aviation METAR data (public)
   nws-current.ts      # NWS current conditions (auth required)
   nws-forecast.ts     # NWS 12-hour hourly forecast (auth required)
@@ -28,23 +28,18 @@ lib/
   ApiEndpoint.ts      # Base class for all endpoints
   middleware.ts       # Validation utilities
   weatherFormatters.ts # Shared OWM response formatting
-  tegnaFormatters.ts  # Shared response formatting for one regional weather feed
-  hearstFormatters.ts # Shared response formatting for another regional weather feed
+  nwsFormatters.ts    # Shared NWS response formatting
 services/
   OpenWeatherMapService.ts  # OWM API client
   GarminService.ts          # Garmin aviation data client
   NWSService.ts             # National Weather Service API client
-  TegnaStationService.ts    # Regional weather feed API client
-  HearstStationService.ts   # Regional weather feed API client
 models/
   common/             # Shared models (ValidationError)
   weather/            # Weather-specific models
   metar/              # METAR-specific models
   nws/                # NWS-specific models
   tools/              # Tool definition models
-  tegna/              # Models for one regional weather feed
-  hearst/             # Models for another regional weather feed
-  localWeather/       # Shared output shape for /api/weather/local across providers
+  localWeather/       # Output shape for /api/weather/local, composed from the NWS models
 ```
 
 ### Adding New Endpoints
@@ -258,7 +253,7 @@ curl -H "x-api-token: your_token_here" \
 
 **Response:** Same shape as [`/api/weather`](#weather-endpoint) — the zip code is resolved to coordinates via OpenWeatherMap's Geocoding API before fetching weather data.
 
-### Local News Weather Endpoint
+### Local Weather Endpoint
 
 **Endpoint:** `/api/weather/local`
 
@@ -266,9 +261,11 @@ curl -H "x-api-token: your_token_here" \
 
 > **Authentication:** None required — this endpoint is publicly accessible without an `x-api-token` header.
 
+A convenience wrapper around the [NWS Current Conditions](#nws-current-conditions-endpoint) and [NWS Hourly Forecast](#nws-hourly-forecast-endpoint) endpoints below for a fixed set of cities, so callers don't need to know each city's coordinates.
+
 **Query Parameters:**
 
-- `city` (optional): Which local news feed to pull from. Default: `indianapolis`
+- `city` (optional): Which city to fetch. Default: `indianapolis`
   - `indianapolis`
   - `minneapolis`
   - `san_antonio`
@@ -285,78 +282,39 @@ curl "http://localhost:3000/api/weather/local?city=minneapolis"
 ```json
 {
   "current": {
-    "summary": "Clear",
-    "icon_url": "https://example.com/assets/weather-icons/partly-cloudy-night_210x210.png",
-    "humidity": 87,
-    "temperature": 63,
-    "feels_like": 63,
-    "wind_speed": 3,
-    "wind_direction": "NNW",
-    "precipitation_chance": 0,
-    "precipitation_type": "none",
-    "is_daytime": false,
-    "observed_at": "2026-07-30T06:16:08"
+    "start_time": "2026-02-27T12:00:00-05:00",
+    "start_time_formatted_time": "12:00 PM",
+    "start_time_formatted_datetime": "02/27/2026 12:00 PM",
+    "is_daytime": true,
+    "temperature": 45,
+    "temperature_unit": "F",
+    "wind_speed": "10 mph",
+    "wind_direction": "NW",
+    "short_forecast": "Mostly cloudy",
+    "probability_of_precipitation": 20,
+    "relative_humidity": 65
   },
   "hourly": [
     {
-      "summary": "Sunny",
-      "icon_url": "https://example.com/assets/weather-icons/clear-day_210x210.png",
-      "humidity": 86,
-      "temperature": 62,
-      "feels_like": 62,
-      "wind_speed": 3,
-      "wind_direction": "N",
-      "precipitation_chance": 7,
-      "precipitation_type": "Rain",
+      "start_time": "2026-02-27T13:00:00-05:00",
+      "start_time_formatted_time": "01:00 PM",
+      "start_time_formatted_datetime": "02/27/2026 01:00 PM",
       "is_daytime": true,
-      "hour": "7 AM",
-      "day_of_week": "Thu"
+      "temperature": 47,
+      "temperature_unit": "F",
+      "wind_speed": "12 mph",
+      "wind_direction": "W",
+      "short_forecast": "Partly cloudy",
+      "probability_of_precipitation": null,
+      "relative_humidity": 60
     }
   ]
 }
 ```
 
-- `current` (object): Current conditions for the selected city
-- `hourly` (array): Next 5 hourly forecast periods, same shape as `current` but with `hour`/`day_of_week` instead of `observed_at`
-- `icon_url` (string, optional): Absolute URL to a 210x210 condition icon. Not every city's feed provides one, so it's omitted rather than faked where unavailable
-- `precipitation_chance` / `precipitation_type` (optional): Present for all `hourly` periods, but not every city's feed exposes a "right now" precipitation chance for `current`
-- `observed_at` (string, optional): Local timestamp of the current observation, where the feed provides one
-- Non-weather sections (breaking news, closings, video feeds) and other noise are stripped out for every city
+- `current` (object): The current hourly period (same shape as [`/api/nws-current`](#nws-current-conditions-endpoint))
+- `hourly` (array): Next 5 hourly forecast periods after `current` (same shape as [`/api/nws-forecast`](#nws-hourly-forecast-endpoint), just fewer periods)
 - An unrecognized `city` returns a 500 with a message listing the supported cities
-
-**Example Request (a lighter-weight city feed):**
-
-```bash
-curl "http://localhost:3000/api/weather/local?city=milwaukee"
-```
-
-**Response (a lighter-weight city feed — note the omitted fields):**
-
-```json
-{
-  "current": {
-    "summary": "Rain Shower",
-    "humidity": 90,
-    "temperature": 67,
-    "feels_like": 67,
-    "wind_speed": 5,
-    "wind_direction": "ENE",
-    "is_daytime": false
-  },
-  "hourly": [
-    {
-      "summary": "Light Rain",
-      "temperature": 67,
-      "feels_like": 67,
-      "precipitation_chance": 82,
-      "is_daytime": false,
-      "hour": "8 PM"
-    }
-  ]
-}
-```
-
-> **Note:** Not every supported city pulls from the same upstream feed, which is why the response shape varies slightly — Indianapolis, Minneapolis, and San Antonio include icon images and a same-moment precipitation chance, while Milwaukee omits `icon_url`, `humidity`, `wind_speed`, `wind_direction`, and `day_of_week` from its hourly periods. A couple of other cities were investigated but aren't included yet: for one, the only easily reachable feed belongs to the wrong network; for another, the desired network's own feed blocks server-side requests outright.
 
 ### METAR Endpoint
 
