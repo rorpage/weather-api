@@ -390,6 +390,7 @@ Combines an airport's runway layout with current wind data to score how favorabl
 
 - `id` (optional): Airport ICAO identifier (e.g., KUMP, KJFK). Default: `KUMP`
 - `format` (optional): `json` or `png`. Default: `json`
+- `theme` (optional, `format=png` only): `light` or `dark`. Default: `light`
 
 **Example Request (JSON):**
 
@@ -451,9 +452,10 @@ curl "http://localhost:3000/api/runway-wind?id=KJFK"
 
 ```bash
 curl "http://localhost:3000/api/runway-wind?id=KJFK&format=png" --output kjfk-runways.png
+curl "http://localhost:3000/api/runway-wind?id=KJFK&format=png&theme=dark" --output kjfk-runways-dark.png
 ```
 
-Returns a `image/png` compass-rose diagram of the airport with each runway drawn between its two ends, color-coded by wind favorability (gray = not favorable, blue = favorable, green = very favorable).
+Returns an `image/png` compass-rose diagram of the airport with each runway drawn between its two ends, color-coded by wind favorability (gray = not favorable, blue = favorable, green = very favorable). `theme=dark` renders on a dark background for night use or dark-mode UIs; `light` (the default) renders on a light background.
 
 ### NWS Current Conditions Endpoint
 

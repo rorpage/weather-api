@@ -6,11 +6,24 @@ const CANVAS_SIZE = 350;
 const PADDING = 40;
 const END_MARKER_RADIUS = 14;
 const EARTH_RADIUS_METERS = 6371000;
-const RENDER_SCALE = 3;
+const RENDER_SCALE = 8;
 const FONT_FAMILY = 'DejaVu Sans Mono';
 // Vercel's serverless runtime has no system fonts installed, so resvg-js needs
 // a font file bundled and loaded explicitly, or all SVG text renders blank.
 const FONT_FILE_PATH = path.join(__dirname, '..', 'assets', 'fonts', 'DejaVuSansMono-Bold.ttf');
+
+export type DiagramTheme = 'light' | 'dark';
+
+interface ThemeColors {
+  background: string;
+  north: string;
+}
+
+// Dark values match Chaplin's fixed (always-dark) airport diagram palette.
+const THEMES: Record<DiagramTheme, ThemeColors> = {
+  light: { background: 'rgb(209, 213, 219)', north: 'rgb(22, 163, 74)' },
+  dark: { background: '#444444', north: '#b3f43d' },
+};
 
 interface Point {
   x: number;
@@ -137,7 +150,11 @@ function endMarkerSvg(point: Point, favorability: RunwayEndOutput['favorability'
  * as a centerline between its two ends, and each end color-coded by wind
  * favorability. Mirrors Chaplin's airport-diagram.tsx component.
  */
-export function buildAirportDiagramSvg(runways: RunwayOutput[]): string {
+export function buildAirportDiagramSvg(
+  runways: RunwayOutput[],
+  theme: DiagramTheme = 'light'
+): string {
+  const { background, north } = THEMES[theme];
   const ends = runways.flatMap((runway) => runway.ends);
   const positions = projectRunwayEnds(ends);
   const center = CANVAS_SIZE / 2;
@@ -164,10 +181,10 @@ export function buildAirportDiagramSvg(runways: RunwayOutput[]): string {
     .join('');
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}">
-    <circle cx="${center}" cy="${center}" r="${center}" fill="rgb(209, 213, 219)" />
+    <circle cx="${center}" cy="${center}" r="${center}" fill="${background}" />
     ${runwayShapes}
-    <polygon fill="rgb(22, 163, 74)" points="${center},6 ${center - 7},20 ${center + 7},20" />
-    <text x="${center}" y="35" fill="rgb(22, 163, 74)" font-family="${FONT_FAMILY}" font-size="16" font-weight="bold" text-anchor="middle">N</text>
+    <polygon fill="${north}" points="${center},6 ${center - 7},20 ${center + 7},20" />
+    <text x="${center}" y="35" fill="${north}" font-family="${FONT_FAMILY}" font-size="16" font-weight="bold" text-anchor="middle">N</text>
   </svg>`;
 }
 
@@ -175,8 +192,11 @@ export function buildAirportDiagramSvg(runways: RunwayOutput[]): string {
  * Renders the airport diagram to a PNG buffer, oversampled to RENDER_SCALE
  * for a crisp image since the SVG's native size (CANVAS_SIZE) is small.
  */
-export function renderAirportDiagramPng(runways: RunwayOutput[]): Buffer {
-  const svg = buildAirportDiagramSvg(runways);
+export function renderAirportDiagramPng(
+  runways: RunwayOutput[],
+  theme: DiagramTheme = 'light'
+): Buffer {
+  const svg = buildAirportDiagramSvg(runways, theme);
   const resvg = new Resvg(svg, {
     fitTo: { mode: 'width', value: CANVAS_SIZE * RENDER_SCALE },
     font: {

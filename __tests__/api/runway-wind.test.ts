@@ -144,7 +144,7 @@ describe('runway-wind endpoint', () => {
 
       await handler(request, response);
 
-      expect(mockRenderAirportDiagramPng).toHaveBeenCalled();
+      expect(mockRenderAirportDiagramPng).toHaveBeenCalledWith(expect.any(Array), 'light');
       expect(response.setHeader).toHaveBeenCalledWith('Content-Type', 'image/png');
       expect(response.status).toHaveBeenCalledWith(200);
       expect(response.send).toHaveBeenCalledWith(pngBuffer);
@@ -163,6 +163,48 @@ describe('runway-wind endpoint', () => {
       await handler(request, response);
 
       expect(response.send).toHaveBeenCalledWith(pngBuffer);
+    });
+
+    it('should pass the dark theme through to the renderer', async () => {
+      mockGetAirport.mockResolvedValue(mockAirportResponse);
+      mockGetMetar.mockResolvedValue(mockMetarResponse);
+      const pngBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+      mockRenderAirportDiagramPng.mockReturnValue(pngBuffer);
+
+      const request = createMockRequest({ query: { format: 'png', theme: 'dark' } });
+      const response = createMockResponse();
+
+      await handler(request, response);
+
+      expect(mockRenderAirportDiagramPng).toHaveBeenCalledWith(expect.any(Array), 'dark');
+    });
+
+    it('should treat theme as case-insensitive', async () => {
+      mockGetAirport.mockResolvedValue(mockAirportResponse);
+      mockGetMetar.mockResolvedValue(mockMetarResponse);
+      const pngBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+      mockRenderAirportDiagramPng.mockReturnValue(pngBuffer);
+
+      const request = createMockRequest({ query: { format: 'png', theme: 'DARK' } });
+      const response = createMockResponse();
+
+      await handler(request, response);
+
+      expect(mockRenderAirportDiagramPng).toHaveBeenCalledWith(expect.any(Array), 'dark');
+    });
+
+    it('should fall back to the light theme for an unrecognized theme value', async () => {
+      mockGetAirport.mockResolvedValue(mockAirportResponse);
+      mockGetMetar.mockResolvedValue(mockMetarResponse);
+      const pngBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+      mockRenderAirportDiagramPng.mockReturnValue(pngBuffer);
+
+      const request = createMockRequest({ query: { format: 'png', theme: 'sepia' } });
+      const response = createMockResponse();
+
+      await handler(request, response);
+
+      expect(mockRenderAirportDiagramPng).toHaveBeenCalledWith(expect.any(Array), 'light');
     });
   });
 

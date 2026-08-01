@@ -4,6 +4,7 @@ import { AopaService } from '../services/AopaService';
 import { GarminService } from '../services/GarminService';
 import { formatRunwayWindOutput } from '../lib/runwayFormatters';
 import { renderAirportDiagramPng } from '../lib/airportDiagramRenderer';
+import type { DiagramTheme } from '../lib/airportDiagramRenderer';
 import type { RunwayWindOutput } from '../models/runway/RunwayWindOutput';
 
 class RunwayWindEndpoint extends ApiEndpoint {
@@ -25,10 +26,12 @@ class RunwayWindEndpoint extends ApiEndpoint {
   }
 
   protected async process(request: VercelRequest): Promise<RunwayWindOutput | Buffer> {
-    const { id = 'KUMP', format = 'json' } = request.query;
+    const { id = 'KUMP', format = 'json', theme = 'light' } = request.query;
 
     const airportId = typeof id === 'string' ? id.toUpperCase() : 'KUMP';
     const outputFormat = typeof format === 'string' ? format.toLowerCase() : 'json';
+    const diagramTheme: DiagramTheme =
+      typeof theme === 'string' && theme.toLowerCase() === 'dark' ? 'dark' : 'light';
 
     const airport = await this.aopaService.getAirport(airportId);
 
@@ -44,7 +47,7 @@ class RunwayWindEndpoint extends ApiEndpoint {
     const runwayWindOutput = formatRunwayWindOutput(airport, metarResponse.metar);
 
     if (outputFormat === 'png') {
-      return renderAirportDiagramPng(runwayWindOutput.runways);
+      return renderAirportDiagramPng(runwayWindOutput.runways, diagramTheme);
     }
 
     return runwayWindOutput;
