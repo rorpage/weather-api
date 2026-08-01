@@ -29,13 +29,13 @@ lib/
   middleware.ts       # Validation utilities
   weatherFormatters.ts # Shared OWM response formatting
   tegnaFormatters.ts  # Shared response formatting for one regional weather feed
-  grayFormatters.ts   # Shared response formatting for another regional weather feed
+  hearstFormatters.ts # Shared response formatting for another regional weather feed
 services/
   OpenWeatherMapService.ts  # OWM API client
   GarminService.ts          # Garmin aviation data client
   NWSService.ts             # National Weather Service API client
   TegnaStationService.ts    # Regional weather feed API client
-  GrayStationService.ts     # Regional weather feed API client
+  HearstStationService.ts   # Regional weather feed API client
 models/
   common/             # Shared models (ValidationError)
   weather/            # Weather-specific models
@@ -43,7 +43,7 @@ models/
   nws/                # NWS-specific models
   tools/              # Tool definition models
   tegna/              # Models for one regional weather feed
-  gray/               # Models for another regional weather feed
+  hearst/             # Models for another regional weather feed
   localWeather/       # Shared output shape for /api/weather/local across providers
 ```
 
@@ -272,7 +272,7 @@ curl -H "x-api-token: your_token_here" \
   - `indianapolis`
   - `minneapolis`
   - `san_antonio`
-  - `madison`
+  - `milwaukee`
 
 **Example Request:**
 
@@ -327,7 +327,7 @@ curl "http://localhost:3000/api/weather/local?city=minneapolis"
 **Example Request (a lighter-weight city feed):**
 
 ```bash
-curl "http://localhost:3000/api/weather/local?city=madison"
+curl "http://localhost:3000/api/weather/local?city=milwaukee"
 ```
 
 **Response (a lighter-weight city feed — note the omitted fields):**
@@ -335,33 +335,28 @@ curl "http://localhost:3000/api/weather/local?city=madison"
 ```json
 {
   "current": {
-    "summary": "Mostly Cloudy",
-    "humidity": 45,
-    "temperature": 81,
-    "feels_like": 81,
-    "wind_speed": 9,
-    "wind_direction": "S",
-    "is_daytime": true
+    "summary": "Rain Shower",
+    "humidity": 90,
+    "temperature": 67,
+    "feels_like": 67,
+    "wind_speed": 5,
+    "wind_direction": "ENE",
+    "is_daytime": false
   },
   "hourly": [
     {
-      "summary": "Partly Cloudy",
-      "humidity": 57,
-      "temperature": 76,
-      "feels_like": 76,
-      "wind_speed": 4,
-      "wind_direction": "SSW",
+      "summary": "Light Rain",
+      "temperature": 67,
+      "feels_like": 67,
+      "precipitation_chance": 82,
       "is_daytime": false,
-      "precipitation_chance": 1,
-      "precipitation_type": "rain",
-      "hour": "9 PM",
-      "day_of_week": "Thursday"
+      "hour": "8 PM"
     }
   ]
 }
 ```
 
-> **Note:** Not every supported city pulls from the same upstream feed, which is why the response shape varies slightly — some include icon images and a same-moment precipitation chance, others provide a longer hourly window but omit those two fields. A couple of other cities were investigated but aren't included yet: for one, the only easily reachable feed belongs to the wrong network; for another, the desired network's own feed blocks server-side requests outright.
+> **Note:** Not every supported city pulls from the same upstream feed, which is why the response shape varies slightly — Indianapolis, Minneapolis, and San Antonio include icon images and a same-moment precipitation chance, while Milwaukee omits `icon_url`, `humidity`, `wind_speed`, `wind_direction`, and `day_of_week` from its hourly periods. A couple of other cities were investigated but aren't included yet: for one, the only easily reachable feed belongs to the wrong network; for another, the desired network's own feed blocks server-side requests outright.
 
 ### METAR Endpoint
 

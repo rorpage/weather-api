@@ -1,29 +1,31 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ApiEndpoint } from '../../lib/ApiEndpoint';
 import { TegnaStationService } from '../../services/TegnaStationService';
-import { GrayStationService } from '../../services/GrayStationService';
+import { HearstStationService } from '../../services/HearstStationService';
 import { formatTegnaOutput } from '../../lib/tegnaFormatters';
-import { formatGrayOutput } from '../../lib/grayFormatters';
+import { formatHearstOutput } from '../../lib/hearstFormatters';
 import type { LocalWeatherOutput } from '../../models/localWeather/LocalWeatherOutput';
 
 const DEFAULT_CITY = 'indianapolis';
 const HOURLY_LIMIT = 5;
 
-const CITY_STATIONS: Record<string, { provider: 'tegna' | 'gray'; host: string }> = {
+type CityStation = { provider: 'tegna'; host: string } | { provider: 'hearst'; zip: string };
+
+const CITY_STATIONS: Record<string, CityStation> = {
   indianapolis: { provider: 'tegna', host: 'www.wthr.com' },
   minneapolis: { provider: 'tegna', host: 'www.kare11.com' },
   san_antonio: { provider: 'tegna', host: 'www.kens5.com' },
-  madison: { provider: 'gray', host: 'www.wmtv15news.com' },
+  milwaukee: { provider: 'hearst', zip: '53202' },
 };
 
 class LocalWeatherEndpoint extends ApiEndpoint {
   private tegnaService: TegnaStationService;
-  private grayService: GrayStationService;
+  private hearstService: HearstStationService;
 
   constructor() {
     super();
     this.tegnaService = new TegnaStationService();
-    this.grayService = new GrayStationService();
+    this.hearstService = new HearstStationService();
   }
 
   protected requiresAuth(): boolean {
@@ -45,15 +47,21 @@ class LocalWeatherEndpoint extends ApiEndpoint {
       );
     }
 
-    const output =
-      station.provider === 'gray'
-        ? formatGrayOutput(await this.grayService.getWeatherData(station.host))
-        : formatTegnaOutput(
-            (await this.tegnaService.getHeaderData(station.host)).weather,
-            station.host
-          );
+    const output = await this.fetchOutput(station);
 
     return { ...output, hourly: output.hourly.slice(0, HOURLY_LIMIT) };
+  }
+
+  private async fetchOutput(station: CityStation): Promise<LocalWeatherOutput> {
+    switch (station.provider) {
+      case 'hearst':
+        return formatHearstOutput(await this.hearstService.getWeatherData(station.zip));
+      case 'tegna':
+        return formatTegnaOutput(
+          (await this.tegnaService.getHeaderData(station.host)).weather,
+          station.host
+        );
+    }
   }
 }
 

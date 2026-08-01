@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { TegnaHeaderResponse } from '../../../models/tegna/TegnaHeaderResponse';
-import type { GrayWeatherResponse } from '../../../models/gray/GrayWeatherResponse';
+import type { HearstWeatherResponse } from '../../../models/hearst/HearstWeatherResponse';
 
-const { mockGetHeaderData, mockGetWeatherData } = vi.hoisted(() => {
+const { mockGetHeaderData, mockGetHearstWeatherData } = vi.hoisted(() => {
   return {
     mockGetHeaderData: vi.fn(),
-    mockGetWeatherData: vi.fn(),
+    mockGetHearstWeatherData: vi.fn(),
   };
 });
 
@@ -20,11 +20,11 @@ vi.mock('../../../services/TegnaStationService', () => {
   };
 });
 
-vi.mock('../../../services/GrayStationService', () => {
+vi.mock('../../../services/HearstStationService', () => {
   return {
-    GrayStationService: vi.fn().mockImplementation(() => {
+    HearstStationService: vi.fn().mockImplementation(() => {
       return {
-        getWeatherData: mockGetWeatherData,
+        getWeatherData: mockGetHearstWeatherData,
       };
     }),
   };
@@ -100,32 +100,25 @@ describe('weather/local endpoint', () => {
     },
   };
 
-  const mockGrayResponse: GrayWeatherResponse = {
-    imperial: {
-      currentObservation: {
-        dayOrNight: 'D',
-        iconCode: 28,
-        relativeHumidity: 45,
-        temperature: 81,
-        temperatureFeelsLike: 81,
-        windDirectionCardinal: 'S',
-        windSpeed: 9,
-        wxPhraseLong: 'Mostly Cloudy',
+  const mockHearstResponse: HearstWeatherResponse = {
+    data: {
+      current: {
+        feels_like_f: 67,
+        icon_name: 'nt_rain',
+        rel_humidity: 90,
+        sky: 'Rain Shower',
+        temp_f: 67,
+        wind_dir_card: 'ENE',
+        wind_speed_mph: 5,
       },
-      hourlyForecast: [
+      hourly: [
         {
-          dayOfWeek: 'Thursday',
-          dayOrNight: 'N',
-          iconCode: 29,
-          precipChance: 1,
-          precipType: 'rain',
-          relativeHumidity: 57,
-          temperature: 76,
-          temperatureFeelsLike: 76,
-          validTimeLocal: '2026-07-30T21:00:00-0500',
-          windDirectionCardinal: 'SSW',
-          windSpeed: 4,
-          wxPhraseLong: 'Partly Cloudy',
+          feels_like_f: 67,
+          hour_display: '8 PM',
+          icon_name: 'nt_rain',
+          precip_chance: 82,
+          sky_long: 'Light Rain',
+          temp_f: 67,
         },
       ],
     },
@@ -234,60 +227,54 @@ describe('weather/local endpoint', () => {
       expect(vi.mocked(response.json).mock.calls[0][0].hourly).toHaveLength(5);
     });
 
-    it('should limit hourly periods to 5 for the Gray provider too', async () => {
-      const period = mockGrayResponse.imperial.hourlyForecast[0];
-      mockGetWeatherData.mockResolvedValue({
-        imperial: {
-          ...mockGrayResponse.imperial,
-          hourlyForecast: Array.from({ length: 8 }, () => period),
+    it('should fetch Milwaukee data from the Hearst provider when city=milwaukee', async () => {
+      mockGetHearstWeatherData.mockResolvedValue(mockHearstResponse);
+
+      const request = createMockRequest({ query: { city: 'milwaukee' } });
+      const response = createMockResponse();
+
+      await handler(request, response);
+
+      expect(mockGetHearstWeatherData).toHaveBeenCalledWith('53202');
+      expect(response.status).toHaveBeenCalledWith(200);
+      expect(response.json).toHaveBeenCalledWith({
+        current: {
+          summary: 'Rain Shower',
+          humidity: 90,
+          temperature: 67,
+          feels_like: 67,
+          wind_speed: 5,
+          wind_direction: 'ENE',
+          is_daytime: false,
+        },
+        hourly: [
+          {
+            summary: 'Light Rain',
+            temperature: 67,
+            feels_like: 67,
+            precipitation_chance: 82,
+            is_daytime: false,
+            hour: '8 PM',
+          },
+        ],
+      });
+    });
+
+    it('should limit hourly periods to 5 for the Hearst provider too', async () => {
+      const period = mockHearstResponse.data.hourly[0];
+      mockGetHearstWeatherData.mockResolvedValue({
+        data: {
+          ...mockHearstResponse.data,
+          hourly: Array.from({ length: 8 }, () => period),
         },
       });
 
-      const request = createMockRequest({ query: { city: 'madison' } });
+      const request = createMockRequest({ query: { city: 'milwaukee' } });
       const response = createMockResponse();
 
       await handler(request, response);
 
       expect(vi.mocked(response.json).mock.calls[0][0].hourly).toHaveLength(5);
-    });
-
-    it('should fetch Madison data from the Gray provider when city=madison', async () => {
-      mockGetWeatherData.mockResolvedValue(mockGrayResponse);
-
-      const request = createMockRequest({ query: { city: 'madison' } });
-      const response = createMockResponse();
-
-      await handler(request, response);
-
-      expect(mockGetWeatherData).toHaveBeenCalledWith('www.wmtv15news.com');
-      expect(mockGetHeaderData).not.toHaveBeenCalled();
-      expect(response.status).toHaveBeenCalledWith(200);
-      expect(response.json).toHaveBeenCalledWith({
-        current: {
-          summary: 'Mostly Cloudy',
-          humidity: 45,
-          temperature: 81,
-          feels_like: 81,
-          wind_speed: 9,
-          wind_direction: 'S',
-          is_daytime: true,
-        },
-        hourly: [
-          {
-            summary: 'Partly Cloudy',
-            humidity: 57,
-            temperature: 76,
-            feels_like: 76,
-            wind_speed: 4,
-            wind_direction: 'SSW',
-            is_daytime: false,
-            precipitation_chance: 1,
-            precipitation_type: 'rain',
-            hour: '9 PM',
-            day_of_week: 'Thursday',
-          },
-        ],
-      });
     });
   });
 
@@ -327,7 +314,7 @@ describe('weather/local endpoint', () => {
       expect(response.json).toHaveBeenCalledWith({
         error: 'Internal server error',
         message:
-          'Unsupported city: austin. Supported cities: indianapolis, minneapolis, san_antonio, madison',
+          'Unsupported city: austin. Supported cities: indianapolis, minneapolis, san_antonio, milwaukee',
       });
 
       consoleErrorSpy.mockRestore();
