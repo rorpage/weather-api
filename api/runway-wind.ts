@@ -3,7 +3,7 @@ import { ApiEndpoint } from '../lib/ApiEndpoint';
 import { AopaService } from '../services/AopaService';
 import { GarminService } from '../services/GarminService';
 import { formatRunwayWindOutput } from '../lib/runwayFormatters';
-import { renderAirportDiagramPng } from '../lib/airportDiagramRenderer';
+import { buildAirportDiagramSvg, renderAirportDiagramPng } from '../lib/airportDiagramRenderer';
 import type { DiagramTheme } from '../lib/airportDiagramRenderer';
 import type { RunwayWindOutput } from '../models/runway/RunwayWindOutput';
 
@@ -25,7 +25,7 @@ class RunwayWindEndpoint extends ApiEndpoint {
     return []; // id and format are optional with default values
   }
 
-  protected async process(request: VercelRequest): Promise<RunwayWindOutput | Buffer> {
+  protected async process(request: VercelRequest): Promise<RunwayWindOutput | Buffer | string> {
     const { id = 'KUMP', format = 'json', theme = 'light' } = request.query;
 
     const airportId = typeof id === 'string' ? id.toUpperCase() : 'KUMP';
@@ -50,12 +50,22 @@ class RunwayWindEndpoint extends ApiEndpoint {
       return renderAirportDiagramPng(runwayWindOutput.runways, diagramTheme);
     }
 
+    if (outputFormat === 'svg') {
+      return buildAirportDiagramSvg(runwayWindOutput.runways, diagramTheme);
+    }
+
     return runwayWindOutput;
   }
 
   protected writeResponse(response: VercelResponse, data: unknown): VercelResponse {
     if (Buffer.isBuffer(data)) {
       response.setHeader('Content-Type', 'image/png');
+
+      return response.status(200).send(data);
+    }
+
+    if (typeof data === 'string') {
+      response.setHeader('Content-Type', 'image/svg+xml');
 
       return response.status(200).send(data);
     }

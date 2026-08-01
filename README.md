@@ -19,7 +19,7 @@ api/
   zip.ts              # OpenWeatherMap current weather by zip code (auth required)
   local.ts            # NWS current conditions + hourly forecast for a fixed set of cities (public)
   metar.ts            # Garmin aviation METAR data (public)
-  runway-wind.ts      # Runway/wind favorability, as JSON or a PNG diagram (public)
+  runway-wind.ts      # Runway/wind favorability, as JSON, SVG, or PNG diagram (public)
   nws-current.ts      # NWS current conditions (auth required)
   nws-forecast.ts     # NWS 12-hour hourly forecast (auth required)
   tools.ts            # Anthropic-compatible tool definitions (public)
@@ -195,69 +195,18 @@ This ensures only high-quality, tested code makes it into the repository and get
 
 ## API Usage
 
-### Weather Endpoint
+Endpoints are listed alphabetically by path below. At a glance:
 
-**Endpoint:** `/api/weather`
-
-**Method:** `GET`
-
-**Headers:**
-
-- `x-api-token` (required): API token for authentication
-
-**Query Parameters:**
-
-- `lat` (required): Latitude coordinate
-- `lon` (required): Longitude coordinate
-- `units` (optional): Units of measurement (`standard`, `metric`, or `imperial`). Default: `metric`
-
-**Example Request:**
-
-```bash
-curl -H "x-api-token: your_token_here" \
-  "http://localhost:3000/api/weather?lat=40.7128&lon=-74.0060&units=imperial"
-```
-
-**Response:**
-
-```json
-{
-  "icon": "23°",
-  "message": "Today: High 28°, low 18°, partly cloudy",
-  "title": "23° and scattered clouds. Feels like 20°.",
-  "temperature": 23
-}
-```
-
-- `icon` (string): Temperature with degree symbol for display
-- `message` (string): Today's forecast with high, low, and conditions
-- `title` (string): Current conditions summary with feels-like temperature
-- `temperature` (number): Current temperature as an integer (rounded)
-
-### Weather by Zip Code Endpoint
-
-**Endpoint:** `/api/zip`
-
-**Method:** `GET`
-
-**Headers:**
-
-- `x-api-token` (required): API token for authentication
-
-**Query Parameters:**
-
-- `zip` (required): Zip or postal code
-- `country` (optional): ISO 3166 country code. Default: `US`
-- `units` (optional): Units of measurement (`standard`, `metric`, or `imperial`). Default: `metric`
-
-**Example Request:**
-
-```bash
-curl -H "x-api-token: your_token_here" \
-  "http://localhost:3000/api/zip?zip=10001&units=imperial"
-```
-
-**Response:** Same shape as [`/api/weather`](#weather-endpoint) — the zip code is resolved to coordinates via OpenWeatherMap's Geocoding API before fetching weather data.
+| Endpoint            | Auth required?             |
+| ------------------- | -------------------------- |
+| `/api/local`        | No                         |
+| `/api/metar`        | No                         |
+| `/api/nws-current`  | Yes — `x-api-token` header |
+| `/api/nws-forecast` | Yes — `x-api-token` header |
+| `/api/runway-wind`  | No                         |
+| `/api/tools`        | No                         |
+| `/api/weather`      | Yes — `x-api-token` header |
+| `/api/zip`          | Yes — `x-api-token` header |
 
 ### Local Weather Endpoint
 
@@ -375,6 +324,121 @@ curl "http://localhost:3000/api/metar?id=KJFK"
 - `flight_category` (string): `"VFR"`, `"MVFR"`, `"IFR"`, or `"LIFR"`
 - `sky_conditions` (array): Cloud layers, each with `coverage`, `base_feet`, and `description`
 
+### NWS Current Conditions Endpoint
+
+**Endpoint:** `/api/nws-current`
+
+**Method:** `GET`
+
+> **Authentication:** Required — pass a valid `x-api-token` header (see below).
+
+**Headers:**
+
+- `x-api-token` (required): API token for authentication
+
+**Query Parameters:**
+
+- `lat` (required): Latitude coordinate (US locations only)
+- `lon` (required): Longitude coordinate (US locations only)
+
+**Example Request:**
+
+```bash
+curl -H "x-api-token: your_token_here" \
+  "http://localhost:3000/api/nws-current?lat=39.7684&lon=-86.1581"
+```
+
+**Response:**
+
+```json
+{
+  "start_time": "2026-02-27T12:00:00-05:00",
+  "start_time_formatted_time": "12:00",
+  "start_time_formatted_datetime": "02/27/2026 12:00 PM",
+  "is_daytime": true,
+  "temperature": 45,
+  "temperature_unit": "F",
+  "wind_speed": "10 mph",
+  "wind_direction": "NW",
+  "short_forecast": "Mostly cloudy",
+  "probability_of_precipitation": 20,
+  "relative_humidity": 65
+}
+```
+
+- `start_time` (string): Full ISO 8601 timestamp of the period start (e.g., `"2026-02-27T12:00:00-05:00"`)
+- `start_time_formatted_time` (string): Local time of the period in `hh:mm AM/PM` 12-hour format
+- `start_time_formatted_datetime` (string): Local date and time formatted as `MM/DD/YYYY HH:MM AM/PM`
+- `is_daytime` (boolean): Whether this is a daytime period
+- `temperature` (number): Temperature as an integer
+- `temperature_unit` (string): `"F"` for Fahrenheit
+- `wind_speed` (string): Wind speed (e.g., `"10 mph"`)
+- `wind_direction` (string): Cardinal wind direction (e.g., `"NW"`)
+- `short_forecast` (string): Brief condition summary (e.g., `"Mostly cloudy"`)
+- `probability_of_precipitation` (number | null): Precipitation chance (0–100)
+- `relative_humidity` (number | null): Relative humidity (0–100)
+
+### NWS Hourly Forecast Endpoint
+
+**Endpoint:** `/api/nws-forecast`
+
+**Method:** `GET`
+
+> **Authentication:** Required — pass a valid `x-api-token` header (see below).
+
+**Headers:**
+
+- `x-api-token` (required): API token for authentication
+
+**Query Parameters:**
+
+- `lat` (required): Latitude coordinate (US locations only)
+- `lon` (required): Longitude coordinate (US locations only)
+
+**Example Request:**
+
+```bash
+curl -H "x-api-token: your_token_here" \
+  "http://localhost:3000/api/nws-forecast?lat=39.7684&lon=-86.1581"
+```
+
+**Response:**
+
+```json
+{
+  "periods": [
+    {
+      "start_time": "2026-02-27T12:00:00-05:00",
+      "start_time_formatted_time": "12:00",
+      "start_time_formatted_datetime": "02/27/2026 12:00 PM",
+      "is_daytime": true,
+      "temperature": 45,
+      "temperature_unit": "F",
+      "wind_speed": "10 mph",
+      "wind_direction": "NW",
+      "short_forecast": "Mostly cloudy",
+      "probability_of_precipitation": 20,
+      "relative_humidity": 65
+    }
+  ]
+}
+```
+
+- `periods` (array): Up to 12 hourly forecast periods, each with:
+  - `start_time` (string): Full ISO 8601 timestamp of the period start
+  - `start_time_formatted_time` (string): Local time of the period in `hh:mm AM/PM` 12-hour format
+  - `start_time_formatted_datetime` (string): Local date and time formatted as `MM/DD/YYYY HH:MM AM/PM`
+  - `is_daytime` (boolean): Whether this is a daytime period
+  - `temperature` (number): Temperature as an integer
+  - `temperature_unit` (string): `"F"` for Fahrenheit
+  - `wind_speed` (string): Wind speed (e.g., `"10 mph"`)
+  - `wind_direction` (string): Cardinal wind direction (e.g., `"NW"`)
+  - `short_forecast` (string): Brief condition summary (e.g., `"Mostly cloudy"`)
+  - `probability_of_precipitation` (number | null): Precipitation chance (0–100)
+  - `relative_humidity` (number | null): Relative humidity (0–100)
+
+> **Note:** Both NWS endpoints use the [National Weather Service API](https://api.weather.gov) which only covers US locations. No API key required — NWS data is free and public.
+
 ### Runway Wind Endpoint
 
 **Endpoint:** `/api/runway-wind`
@@ -383,13 +447,13 @@ curl "http://localhost:3000/api/metar?id=KJFK"
 
 > **Authentication:** None required — this endpoint is publicly accessible without an `x-api-token` header.
 
-Combines an airport's runway layout with current wind data to score how favorable each runway end is to land on or depart from, and can render the result as either JSON or a PNG airport diagram.
+Combines an airport's runway layout with current wind data to score how favorable each runway end is to land on or depart from, and can render the result as JSON, an SVG diagram, or a PNG diagram.
 
 **Query Parameters:**
 
 - `id` (optional): Airport ICAO identifier (e.g., KUMP, KJFK). Default: `KUMP`
-- `format` (optional): `json` or `png`. Default: `json`
-- `theme` (optional, `format=png` only): `light` or `dark`. Default: `light`
+- `format` (optional): `json`, `svg`, or `png`. Default: `json`
+- `theme` (optional, `format=svg` or `format=png` only): `light` or `dark`. Default: `light`
 
 **Example Request (JSON):**
 
@@ -447,6 +511,15 @@ curl "http://localhost:3000/api/runway-wind?id=KJFK"
 - `runways` (array): Each runway's `name`, `length_feet`, `width_feet`, `surface`, and its two `ends`
 - Each runway end includes its `identifier`, true `heading_degrees`, `latitude`/`longitude`, `crosswind_knots`, `headwind_knots` (negative indicates a tailwind component), `wind_angle_degrees` (0–180, angle off the nose), and `favorability` (`"not_favorable"`, `"favorable"`, or `"very_favorable"`)
 
+**Example Request (SVG diagram):**
+
+```bash
+curl "http://localhost:3000/api/runway-wind?id=KJFK&format=svg" --output kjfk-runways.svg
+curl "http://localhost:3000/api/runway-wind?id=KJFK&format=svg&theme=dark" --output kjfk-runways-dark.svg
+```
+
+Returns an `image/svg+xml` compass-rose diagram of the airport, scalable to any size without quality loss. Same layout and color coding as the PNG diagram below.
+
 **Example Request (PNG diagram):**
 
 ```bash
@@ -455,117 +528,6 @@ curl "http://localhost:3000/api/runway-wind?id=KJFK&format=png&theme=dark" --out
 ```
 
 Returns an `image/png` compass-rose diagram of the airport with each runway drawn between its two ends, color-coded by wind favorability (gray = not favorable, blue = favorable, green = very favorable). `theme=dark` renders on a dark background for night use or dark-mode UIs; `light` (the default) renders on a light background.
-
-### NWS Current Conditions Endpoint
-
-**Endpoint:** `/api/nws-current`
-
-**Method:** `GET`
-
-**Headers:**
-
-- `x-api-token` (required): API token for authentication
-
-**Query Parameters:**
-
-- `lat` (required): Latitude coordinate (US locations only)
-- `lon` (required): Longitude coordinate (US locations only)
-
-**Example Request:**
-
-```bash
-curl -H "x-api-token: your_token_here" \
-  "http://localhost:3000/api/nws-current?lat=39.7684&lon=-86.1581"
-```
-
-**Response:**
-
-```json
-{
-  "start_time": "2026-02-27T12:00:00-05:00",
-  "start_time_formatted_time": "12:00",
-  "start_time_formatted_datetime": "02/27/2026 12:00 PM",
-  "is_daytime": true,
-  "temperature": 45,
-  "temperature_unit": "F",
-  "wind_speed": "10 mph",
-  "wind_direction": "NW",
-  "short_forecast": "Mostly cloudy",
-  "probability_of_precipitation": 20,
-  "relative_humidity": 65
-}
-```
-
-- `start_time` (string): Full ISO 8601 timestamp of the period start (e.g., `"2026-02-27T12:00:00-05:00"`)
-- `start_time_formatted_time` (string): Local time of the period in `hh:mm AM/PM` 12-hour format
-- `start_time_formatted_datetime` (string): Local date and time formatted as `MM/DD/YYYY HH:MM AM/PM`
-- `is_daytime` (boolean): Whether this is a daytime period
-- `temperature` (number): Temperature as an integer
-- `temperature_unit` (string): `"F"` for Fahrenheit
-- `wind_speed` (string): Wind speed (e.g., `"10 mph"`)
-- `wind_direction` (string): Cardinal wind direction (e.g., `"NW"`)
-- `short_forecast` (string): Brief condition summary (e.g., `"Mostly cloudy"`)
-- `probability_of_precipitation` (number | null): Precipitation chance (0–100)
-- `relative_humidity` (number | null): Relative humidity (0–100)
-
-### NWS Hourly Forecast Endpoint
-
-**Endpoint:** `/api/nws-forecast`
-
-**Method:** `GET`
-
-**Headers:**
-
-- `x-api-token` (required): API token for authentication
-
-**Query Parameters:**
-
-- `lat` (required): Latitude coordinate (US locations only)
-- `lon` (required): Longitude coordinate (US locations only)
-
-**Example Request:**
-
-```bash
-curl -H "x-api-token: your_token_here" \
-  "http://localhost:3000/api/nws-forecast?lat=39.7684&lon=-86.1581"
-```
-
-**Response:**
-
-```json
-{
-  "periods": [
-    {
-      "start_time": "2026-02-27T12:00:00-05:00",
-      "start_time_formatted_time": "12:00",
-      "start_time_formatted_datetime": "02/27/2026 12:00 PM",
-      "is_daytime": true,
-      "temperature": 45,
-      "temperature_unit": "F",
-      "wind_speed": "10 mph",
-      "wind_direction": "NW",
-      "short_forecast": "Mostly cloudy",
-      "probability_of_precipitation": 20,
-      "relative_humidity": 65
-    }
-  ]
-}
-```
-
-- `periods` (array): Up to 12 hourly forecast periods, each with:
-  - `start_time` (string): Full ISO 8601 timestamp of the period start
-  - `start_time_formatted_time` (string): Local time of the period in `hh:mm AM/PM` 12-hour format
-  - `start_time_formatted_datetime` (string): Local date and time formatted as `MM/DD/YYYY HH:MM AM/PM`
-  - `is_daytime` (boolean): Whether this is a daytime period
-  - `temperature` (number): Temperature as an integer
-  - `temperature_unit` (string): `"F"` for Fahrenheit
-  - `wind_speed` (string): Wind speed (e.g., `"10 mph"`)
-  - `wind_direction` (string): Cardinal wind direction (e.g., `"NW"`)
-  - `short_forecast` (string): Brief condition summary (e.g., `"Mostly cloudy"`)
-  - `probability_of_precipitation` (number | null): Precipitation chance (0–100)
-  - `relative_humidity` (number | null): Relative humidity (0–100)
-
-> **Note:** Both NWS endpoints use the [National Weather Service API](https://api.weather.gov) which only covers US locations. No API key required — NWS data is free and public.
 
 ### LLM Tools Endpoint
 
@@ -630,6 +592,74 @@ curl "http://localhost:3000/api/tools"
 **Usage with Anthropic API:**
 
 Fetch the tool definitions and pass them directly to the `tools` parameter of a Claude API request. When Claude calls a tool, proxy the `input` object as query parameters to the corresponding endpoint (adding your `x-api-token` header for authenticated endpoints).
+
+### Weather Endpoint
+
+**Endpoint:** `/api/weather`
+
+**Method:** `GET`
+
+> **Authentication:** Required — pass a valid `x-api-token` header (see below).
+
+**Headers:**
+
+- `x-api-token` (required): API token for authentication
+
+**Query Parameters:**
+
+- `lat` (required): Latitude coordinate
+- `lon` (required): Longitude coordinate
+- `units` (optional): Units of measurement (`standard`, `metric`, or `imperial`). Default: `metric`
+
+**Example Request:**
+
+```bash
+curl -H "x-api-token: your_token_here" \
+  "http://localhost:3000/api/weather?lat=40.7128&lon=-74.0060&units=imperial"
+```
+
+**Response:**
+
+```json
+{
+  "icon": "23°",
+  "message": "Today: High 28°, low 18°, partly cloudy",
+  "title": "23° and scattered clouds. Feels like 20°.",
+  "temperature": 23
+}
+```
+
+- `icon` (string): Temperature with degree symbol for display
+- `message` (string): Today's forecast with high, low, and conditions
+- `title` (string): Current conditions summary with feels-like temperature
+- `temperature` (number): Current temperature as an integer (rounded)
+
+### Weather by Zip Code Endpoint
+
+**Endpoint:** `/api/zip`
+
+**Method:** `GET`
+
+> **Authentication:** Required — pass a valid `x-api-token` header (see below).
+
+**Headers:**
+
+- `x-api-token` (required): API token for authentication
+
+**Query Parameters:**
+
+- `zip` (required): Zip or postal code
+- `country` (optional): ISO 3166 country code. Default: `US`
+- `units` (optional): Units of measurement (`standard`, `metric`, or `imperial`). Default: `metric`
+
+**Example Request:**
+
+```bash
+curl -H "x-api-token: your_token_here" \
+  "http://localhost:3000/api/zip?zip=10001&units=imperial"
+```
+
+**Response:** Same shape as [`/api/weather`](#weather-endpoint) — the zip code is resolved to coordinates via OpenWeatherMap's Geocoding API before fetching weather data.
 
 ## Deployment
 

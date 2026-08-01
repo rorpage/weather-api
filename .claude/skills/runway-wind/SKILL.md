@@ -23,7 +23,7 @@ Get runway wind favorability for airport **${0:-KUMP}**.
    - Airport name and current wind (direction and speed)
    - The best runway to use, called out clearly
    - A table of every runway with each end's crosswind, headwind, wind angle, and favorability
-   - A note that a PNG airport diagram is available at `/api/runway-wind?id=${0:-KUMP}&format=png` (add `&theme=dark` for a dark-background version)
+   - A note that an airport diagram is available at `/api/runway-wind?id=${0:-KUMP}&format=svg` (SVG, scalable) or `&format=png` (raster), each with `&theme=dark` for a dark-background version
 
 3. Use emoji, headings, and formatting for clarity.
 

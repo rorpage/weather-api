@@ -3,13 +3,15 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { AopaAirportResponse } from '../../models/runway/AopaAirportResponse';
 import type { MetarResponse } from '../../models/metar/MetarResponse';
 
-const { mockGetAirport, mockGetMetar, mockRenderAirportDiagramPng } = vi.hoisted(() => {
-  return {
-    mockGetAirport: vi.fn(),
-    mockGetMetar: vi.fn(),
-    mockRenderAirportDiagramPng: vi.fn(),
-  };
-});
+const { mockGetAirport, mockGetMetar, mockRenderAirportDiagramPng, mockBuildAirportDiagramSvg } =
+  vi.hoisted(() => {
+    return {
+      mockGetAirport: vi.fn(),
+      mockGetMetar: vi.fn(),
+      mockRenderAirportDiagramPng: vi.fn(),
+      mockBuildAirportDiagramSvg: vi.fn(),
+    };
+  });
 
 vi.mock('../../services/AopaService', () => {
   return {
@@ -30,6 +32,7 @@ vi.mock('../../services/GarminService', () => {
 vi.mock('../../lib/airportDiagramRenderer', () => {
   return {
     renderAirportDiagramPng: mockRenderAirportDiagramPng,
+    buildAirportDiagramSvg: mockBuildAirportDiagramSvg,
   };
 });
 
@@ -149,6 +152,37 @@ describe('runway-wind endpoint', () => {
       expect(response.status).toHaveBeenCalledWith(200);
       expect(response.send).toHaveBeenCalledWith(pngBuffer);
       expect(response.json).not.toHaveBeenCalled();
+    });
+
+    it('should return an SVG diagram when format=svg is requested', async () => {
+      mockGetAirport.mockResolvedValue(mockAirportResponse);
+      mockGetMetar.mockResolvedValue(mockMetarResponse);
+      const svgMarkup = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
+      mockBuildAirportDiagramSvg.mockReturnValue(svgMarkup);
+
+      const request = createMockRequest({ query: { format: 'svg' } });
+      const response = createMockResponse();
+
+      await handler(request, response);
+
+      expect(mockBuildAirportDiagramSvg).toHaveBeenCalledWith(expect.any(Array), 'light');
+      expect(response.setHeader).toHaveBeenCalledWith('Content-Type', 'image/svg+xml');
+      expect(response.status).toHaveBeenCalledWith(200);
+      expect(response.send).toHaveBeenCalledWith(svgMarkup);
+      expect(response.json).not.toHaveBeenCalled();
+    });
+
+    it('should pass the dark theme through to the SVG renderer', async () => {
+      mockGetAirport.mockResolvedValue(mockAirportResponse);
+      mockGetMetar.mockResolvedValue(mockMetarResponse);
+      mockBuildAirportDiagramSvg.mockReturnValue('<svg></svg>');
+
+      const request = createMockRequest({ query: { format: 'svg', theme: 'dark' } });
+      const response = createMockResponse();
+
+      await handler(request, response);
+
+      expect(mockBuildAirportDiagramSvg).toHaveBeenCalledWith(expect.any(Array), 'dark');
     });
 
     it('should treat format as case-insensitive', async () => {
