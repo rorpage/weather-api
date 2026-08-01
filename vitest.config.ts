@@ -14,6 +14,10 @@ export default defineConfig({
         '.vercel/**',
         'coverage/**',
         'models/**',
+        // DOM-wiring only; the pure formatting/geometry logic they call has been
+        // extracted into gaugeFormatting.js/retroFormatting.js, which are covered.
+        'public/cockpit.js',
+        'public/retro.js',
       ],
       thresholds: {
         lines: 80,

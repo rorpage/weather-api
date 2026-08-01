@@ -1,29 +1,5 @@
 const AIRPORT_KEY = 'metar_airport';
 
-// Dark shade of each category color — used for the outer ring of the FC gauge
-const FC_COLORS_DARK = {
-  VFR: '#0C4C24',  // contrast 10.77:1 with white
-  MVFR: '#1d4ed8',
-  IFR: '#b91c1c',
-  LIFR: '#a21caf',
-};
-
-// Slightly lighter (but still WCAG AA with white text) inner-circle fill
-const FC_COLORS_LIGHT = {
-  VFR: '#15803d',  // contrast 5.01:1 with white
-  MVFR: '#2563eb', // contrast 5.17:1 with white
-  IFR: '#dc2626',  // contrast 4.83:1 with white
-  LIFR: '#c026d3', // contrast 4.71:1 with white
-};
-
-function fcColorDark(category) {
-  return FC_COLORS_DARK[(category || '').toUpperCase()] || '#444';
-}
-
-function fcColorLight(category) {
-  return FC_COLORS_LIGHT[(category || '').toUpperCase()] || '#aaa';
-}
-
 // ── SVG helpers ────────────────────────────────────
 function svgEl(tag, attrs) {
   const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -58,14 +34,10 @@ function drawBase(svg) {
 // Draw tick marks along the inner edge of the face
 function drawTicks(svg) {
   for (let deg = 0; deg < 360; deg += 10) {
-    const rad = (deg - 90) * Math.PI / 180;
-    const outerRadius = 85;
     const tickLength = deg % 30 === 0 ? 10 : 5;
+    const { x1, y1, x2, y2 } = tickEndpoints(deg, 85, tickLength);
     svg.appendChild(svgEl('line', {
-      x1: 100 + outerRadius * Math.cos(rad),
-      y1: 100 + outerRadius * Math.sin(rad),
-      x2: 100 + (outerRadius - tickLength) * Math.cos(rad),
-      y2: 100 + (outerRadius - tickLength) * Math.sin(rad),
+      x1, y1, x2, y2,
       stroke: '#666',
       'stroke-width': deg % 30 === 0 ? 2 : 1,
     }));
@@ -78,7 +50,7 @@ function renderTemp(svg, tempC) {
   drawBase(svg);
   drawTicks(svg);
 
-  const display = tempC !== null && tempC !== undefined ? `${Math.round(tempC)}°C` : '--°C';
+  const display = formatCelsius(tempC);
 
   svg.appendChild(svgText(display, {
     x: 100, y: 108,
@@ -98,20 +70,14 @@ function renderWind(svg, windDirection, windSpeed) {
   clearSvg(svg);
   drawBase(svg);
 
-  const isCalm = windDirection === 0 && windSpeed === 0;
+  const isCalm = isWindCalm(windDirection, windSpeed);
 
   // White arc on the outer bezel ring highlighting the wind direction.
   // The arc is drawn at r=91 (midpoint of the bezel between r=87 and r=96)
   // with stroke-width=8 so it stays within the bezel.
   if (!isCalm) {
     const arcRadius = 91;
-    const circumference = 2 * Math.PI * arcRadius;
-    const arcSpanDeg = 10;
-    const arcLength = (arcSpanDeg / 360) * circumference;
-    const gapLength = circumference - arcLength;
-    // SVG strokes start at 3 o'clock. Compass 0° = top (12 o'clock).
-    // Rotate so the arc is centered on windDirection.
-    const rotateAngle = windDirection - arcSpanDeg / 2 - 90;
+    const { arcLength, gapLength, rotateAngle } = windArcGeometry(windDirection, arcRadius, 10);
     svg.appendChild(svgEl('circle', {
       cx: 100, cy: 100, r: arcRadius,
       fill: 'none',
@@ -125,14 +91,10 @@ function renderWind(svg, windDirection, windSpeed) {
 
   // Compass tick marks on the face edge
   for (let deg = 0; deg < 360; deg += 10) {
-    const rad = (deg - 90) * Math.PI / 180;
-    const outerRadius = 84;
     const tickLength = deg % 30 === 0 ? 10 : 5;
+    const { x1, y1, x2, y2 } = tickEndpoints(deg, 84, tickLength);
     svg.appendChild(svgEl('line', {
-      x1: 100 + outerRadius * Math.cos(rad),
-      y1: 100 + outerRadius * Math.sin(rad),
-      x2: 100 + (outerRadius - tickLength) * Math.cos(rad),
-      y2: 100 + (outerRadius - tickLength) * Math.sin(rad),
+      x1, y1, x2, y2,
       stroke: '#666',
       'stroke-width': deg % 30 === 0 ? 2 : 1,
     }));
@@ -146,11 +108,9 @@ function renderWind(svg, windDirection, windSpeed) {
     { label: 'W', angle: 270 },
   ];
   cardinals.forEach(({ label, angle }) => {
-    const rad = (angle - 90) * Math.PI / 180;
-    const labelRadius = 60;
+    const { x, y } = cardinalLabelPosition(angle, 60);
     svg.appendChild(svgText(label, {
-      x: 100 + labelRadius * Math.cos(rad),
-      y: 100 + labelRadius * Math.sin(rad) + 5,
+      x, y,
       'text-anchor': 'middle',
       fill: '#fff',
       'font-family': "'Share Tech Mono', monospace",
@@ -193,7 +153,7 @@ function renderAlt(svg, altimeter) {
   drawBase(svg);
   drawTicks(svg);
 
-  const display = altimeter ? `${altimeter} inHg` : '-- inHg';
+  const display = formatAltimeter(altimeter);
 
   svg.appendChild(svgText(display, {
     x: 100, y: 108,
@@ -246,7 +206,7 @@ function renderVis(svg, visibility) {
   drawBase(svg);
   drawTicks(svg);
 
-  const display = visibility !== undefined && visibility !== null ? `${visibility} SM` : '-- SM';
+  const display = formatVisibility(visibility);
 
   svg.appendChild(svgText(display, {
     x: 100, y: 108,
@@ -266,7 +226,7 @@ function renderDew(svg, dewpoint) {
   drawBase(svg);
   drawTicks(svg);
 
-  const display = dewpoint !== null && dewpoint !== undefined ? `${Math.round(dewpoint)}°C` : '--°C';
+  const display = formatCelsius(dewpoint);
 
   svg.appendChild(svgText(display, {
     x: 100, y: 108,

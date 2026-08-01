@@ -2,10 +2,6 @@
 
 const RETRO_AIRPORT_KEY = 'retro_metar_airport';
 
-function celsiusToFahrenheit(celsius) {
-  return Math.round(celsius * 9 / 5 + 32);
-}
-
 // ── RENDER ─────────────────────────────────────────
 function renderRetro(data) {
   document.getElementById('ws-loading').classList.add('hidden');
@@ -22,47 +18,19 @@ function renderRetro(data) {
   if (airportInput && data.id) airportInput.value = data.id;
 
   // Temperature — show °F / °C like the original WS4000
-  const tempEl = document.getElementById('ws-temp');
-  if (data.temperature !== null && data.temperature !== undefined) {
-    const tempF = celsiusToFahrenheit(data.temperature);
-    tempEl.textContent = `${tempF}°F / ${Math.round(data.temperature)}°C`;
-  } else {
-    tempEl.textContent = '--';
-  }
+  document.getElementById('ws-temp').textContent = formatDualTemperature(data.temperature);
 
   // Dewpoint
-  const dewEl = document.getElementById('ws-dewpoint');
-  if (data.dewpoint !== null && data.dewpoint !== undefined) {
-    const dewF = celsiusToFahrenheit(data.dewpoint);
-    dewEl.textContent = `${dewF}°F / ${Math.round(data.dewpoint)}°C`;
-  } else {
-    dewEl.textContent = '--';
-  }
+  document.getElementById('ws-dewpoint').textContent = formatDualTemperature(data.dewpoint);
 
   // Wind — speed and direction in degrees, or CALM
-  const windEl = document.getElementById('ws-wind');
-  if (data.wind) {
-    const isCalm = data.wind.direction === 0 && data.wind.speed === 0;
-    if (isCalm) {
-      windEl.textContent = 'CALM';
-    } else {
-      windEl.textContent = `${data.wind.speed} KT @ ${data.wind.direction}°`;
-    }
-  } else {
-    windEl.textContent = '--';
-  }
+  document.getElementById('ws-wind').textContent = formatWindDisplay(data.wind);
 
   // Visibility
-  const visEl = document.getElementById('ws-visibility');
-  if (data.visibility !== undefined && data.visibility !== null) {
-    visEl.textContent = `${data.visibility} SM`;
-  } else {
-    visEl.textContent = '--';
-  }
+  document.getElementById('ws-visibility').textContent = formatVisibility(data.visibility);
 
   // Altimeter
-  document.getElementById('ws-altimeter').textContent =
-    data.altimeter ? `${data.altimeter} inHg` : '--';
+  document.getElementById('ws-altimeter').textContent = formatAltimeter(data.altimeter);
 
   // Flight category — coloured via data attribute + CSS
   const flightCatEl = document.getElementById('ws-flight-cat');
@@ -71,11 +39,7 @@ function renderRetro(data) {
   flightCatEl.setAttribute('data-cat', category);
 
   // Sky conditions — guard against empty array
-  const skyEl = document.getElementById('ws-sky');
-  skyEl.textContent =
-    data.sky_conditions?.length
-      ? data.sky_conditions.map((sky) => sky.description.toUpperCase()).join('\n')
-      : 'CLEAR';
+  document.getElementById('ws-sky').textContent = formatSkyConditions(data.sky_conditions);
 
   // METAR ticker — restart the scroll animation on new data using rAF
   const tickerText = document.getElementById('ws-ticker-text');
