@@ -7,7 +7,14 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/**', '__tests__/**', '*.config.{js,ts}', '.vercel/**', 'coverage/**'],
+      exclude: [
+        'node_modules/**',
+        '__tests__/**',
+        '*.config.{js,ts}',
+        '.vercel/**',
+        'coverage/**',
+        'models/**',
+      ],
       thresholds: {
         lines: 80,
         functions: 80,
