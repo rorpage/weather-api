@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import type { NWSForecastResponse } from '../../../models/nws/NWSForecastResponse';
+import type { NWSForecastResponse } from '../../models/nws/NWSForecastResponse';
 
 const { mockGetHourlyForecast } = vi.hoisted(() => {
   return { mockGetHourlyForecast: vi.fn() };
 });
 
-vi.mock('../../../services/NWSService', () => {
+vi.mock('../../services/NWSService', () => {
   return {
     NWSService: vi.fn().mockImplementation(() => ({
       getHourlyForecast: mockGetHourlyForecast,
@@ -14,7 +14,7 @@ vi.mock('../../../services/NWSService', () => {
   };
 });
 
-import handler from '../../../api/weather/local';
+import handler from '../../api/local';
 
 function createMockRequest(overrides: Partial<VercelRequest> = {}): VercelRequest {
   return {
@@ -22,7 +22,7 @@ function createMockRequest(overrides: Partial<VercelRequest> = {}): VercelReques
     headers: { 'x-api-token': 'test-token' },
     query: {},
     body: undefined,
-    url: '/api/weather/local',
+    url: '/api/local',
     ...overrides,
   } as VercelRequest;
 }
@@ -36,7 +36,7 @@ function createMockResponse(): VercelResponse {
   return response as unknown as VercelResponse;
 }
 
-describe('weather/local endpoint', () => {
+describe('local endpoint', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {

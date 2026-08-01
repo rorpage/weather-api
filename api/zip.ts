@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ApiEndpoint } from '../../lib/ApiEndpoint';
-import { OpenWeatherMapService } from '../../services/OpenWeatherMapService';
-import { formatWeatherOutput } from '../../lib/weatherFormatters';
-import type { WeatherOutput } from '../../models/weather/WeatherOutput';
+import { ApiEndpoint } from '../lib/ApiEndpoint';
+import { OpenWeatherMapService } from '../services/OpenWeatherMapService';
+import { formatWeatherOutput } from '../lib/weatherFormatters';
+import type { WeatherOutput } from '../models/weather/WeatherOutput';
 
 class WeatherByZipEndpoint extends ApiEndpoint {
   private weatherService: OpenWeatherMapService;

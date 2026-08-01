@@ -16,9 +16,8 @@ This project uses a clean, modular architecture:
 ```
 api/
   weather.ts          # OpenWeatherMap current weather by coordinates (auth required)
-  weather/
-    zip.ts            # OpenWeatherMap current weather by zip code (auth required)
-    local.ts          # NWS current conditions + hourly forecast for a fixed set of cities (public)
+  zip.ts              # OpenWeatherMap current weather by zip code (auth required)
+  local.ts            # NWS current conditions + hourly forecast for a fixed set of cities (public)
   metar.ts            # Garmin aviation METAR data (public)
   runway-wind.ts      # Runway/wind favorability, as JSON or a PNG diagram (public)
   nws-current.ts      # NWS current conditions (auth required)
@@ -43,7 +42,7 @@ models/
   metar/              # METAR-specific models
   nws/                # NWS-specific models
   tools/              # Tool definition models
-  localWeather/       # Output shape for /api/weather/local, composed from the NWS models
+  localWeather/       # Output shape for /api/local, composed from the NWS models
   runway/             # Runway/wind-specific models
 assets/
   fonts/              # Font bundled for PNG rendering (serverless runtimes have no system fonts)
@@ -237,7 +236,7 @@ curl -H "x-api-token: your_token_here" \
 
 ### Weather by Zip Code Endpoint
 
-**Endpoint:** `/api/weather/zip`
+**Endpoint:** `/api/zip`
 
 **Method:** `GET`
 
@@ -255,14 +254,14 @@ curl -H "x-api-token: your_token_here" \
 
 ```bash
 curl -H "x-api-token: your_token_here" \
-  "http://localhost:3000/api/weather/zip?zip=10001&units=imperial"
+  "http://localhost:3000/api/zip?zip=10001&units=imperial"
 ```
 
 **Response:** Same shape as [`/api/weather`](#weather-endpoint) — the zip code is resolved to coordinates via OpenWeatherMap's Geocoding API before fetching weather data.
 
 ### Local Weather Endpoint
 
-**Endpoint:** `/api/weather/local`
+**Endpoint:** `/api/local`
 
 **Method:** `GET`
 
@@ -281,7 +280,7 @@ A convenience wrapper around the [NWS Current Conditions](#nws-current-condition
 **Example Request:**
 
 ```bash
-curl "http://localhost:3000/api/weather/local?city=minneapolis"
+curl "http://localhost:3000/api/local?city=minneapolis"
 ```
 
 **Response:**

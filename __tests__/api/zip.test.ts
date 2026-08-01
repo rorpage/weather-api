@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import type { WeatherResponse } from '../../../models/weather/WeatherResponse';
-import type { GeocodingResponse } from '../../../models/weather/GeocodingResponse';
+import type { WeatherResponse } from '../../models/weather/WeatherResponse';
+import type { GeocodingResponse } from '../../models/weather/GeocodingResponse';
 
 const { mockGetCoordinatesFromZip, mockGetCurrentWeather } = vi.hoisted(() => {
   return {
@@ -10,7 +10,7 @@ const { mockGetCoordinatesFromZip, mockGetCurrentWeather } = vi.hoisted(() => {
   };
 });
 
-vi.mock('../../../services/OpenWeatherMapService', () => {
+vi.mock('../../services/OpenWeatherMapService', () => {
   return {
     OpenWeatherMapService: vi.fn().mockImplementation(() => {
       return {
@@ -21,7 +21,7 @@ vi.mock('../../../services/OpenWeatherMapService', () => {
   };
 });
 
-import handler from '../../../api/weather/zip';
+import handler from '../../api/zip';
 
 function createMockRequest(overrides: Partial<VercelRequest> = {}): VercelRequest {
   return {
@@ -29,7 +29,7 @@ function createMockRequest(overrides: Partial<VercelRequest> = {}): VercelReques
     headers: { 'x-api-token': 'test-token' },
     query: {},
     body: undefined,
-    url: '/api/weather/zip',
+    url: '/api/zip',
     ...overrides,
   } as VercelRequest;
 }
@@ -43,7 +43,7 @@ function createMockResponse(): VercelResponse {
   return response as unknown as VercelResponse;
 }
 
-describe('weather/zip endpoint', () => {
+describe('zip endpoint', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {

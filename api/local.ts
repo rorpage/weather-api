@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ApiEndpoint } from '../../lib/ApiEndpoint';
-import { NWSService } from '../../services/NWSService';
-import { formatPeriod } from '../../lib/nwsFormatters';
-import type { LocalWeatherOutput } from '../../models/localWeather/LocalWeatherOutput';
+import { ApiEndpoint } from '../lib/ApiEndpoint';
+import { NWSService } from '../services/NWSService';
+import { formatPeriod } from '../lib/nwsFormatters';
+import type { LocalWeatherOutput } from '../models/localWeather/LocalWeatherOutput';
 
 const DEFAULT_CITY = 'indianapolis';
 const HOURLY_LIMIT = 5;
