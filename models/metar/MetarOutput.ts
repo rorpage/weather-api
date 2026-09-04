@@ -5,6 +5,7 @@ export interface MetarOutput {
   dewpoint: number;
   id: string;
   flight_category: string;
+  flight_category_color: string;
   observation_time: string;
   raw_text: string;
   sky_conditions: SkyCondition[];

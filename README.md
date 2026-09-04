@@ -305,6 +305,7 @@ curl "http://localhost:3000/api/metar?id=KJFK"
   "visibility": 10,
   "altimeter": 29.94,
   "flight_category": "VFR",
+  "flight_category_color": "#00aa00",
   "sky_conditions": [
     { "coverage": "FEW", "base_feet": 5000, "description": "Few at 5000ft" },
     { "coverage": "SCT", "base_feet": 8000, "description": "Scattered at 8000ft" }
@@ -322,6 +323,7 @@ curl "http://localhost:3000/api/metar?id=KJFK"
 - `visibility` (number): Visibility in statute miles (SM)
 - `altimeter` (number): Altimeter setting in inHg
 - `flight_category` (string): `"VFR"`, `"MVFR"`, `"IFR"`, or `"LIFR"`
+- `flight_category_color` (string): Hex color associated with the flight category (`#00aa00` VFR, `#0000aa` MVFR, `#aa0000` IFR, `#aa00aa` LIFR, `#444444` if unrecognized)
 - `sky_conditions` (array): Cloud layers, each with `coverage`, `base_feet`, and `description`
 
 ### NWS Current Conditions Endpoint
