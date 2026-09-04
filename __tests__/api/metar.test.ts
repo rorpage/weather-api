@@ -110,6 +110,7 @@ describe('metar endpoint', () => {
       expect(jsonCall.dewpoint).toBe(2);
       expect(jsonCall.id).toBe('KUMP');
       expect(jsonCall.flight_category).toBe('VFR');
+      expect(jsonCall.flight_category_color).toBe('#00aa00');
       expect(jsonCall.observation_time).toMatch(/^\d{2}:\d{2} L$/);
       expect(jsonCall.raw_text).toBe('KUMP 010000Z 18010KT 10SM OVC050 05/02 A3012');
       expect(jsonCall.sky_conditions).toEqual([
@@ -351,6 +352,51 @@ describe('metar endpoint', () => {
         observation_time: string;
       };
       expect(jsonCall.observation_time).toMatch(/^\d{2}:\d{2} L$/);
+    });
+
+    it.each([
+      ['VFR', '#00aa00'],
+      ['MVFR', '#0000aa'],
+      ['IFR', '#aa0000'],
+      ['LIFR', '#aa00aa'],
+    ])('should map flight category %s to color %s', async (visibilityRating, expectedColor) => {
+      mockGetAirportInfo.mockResolvedValue(mockAirportResponse);
+      mockGetMetar.mockResolvedValue({
+        metar: {
+          ...mockMetarResponse.metar,
+          visibilityRating,
+        },
+      });
+
+      const request = createMockRequest();
+      const response = createMockResponse();
+
+      await handler(request, response);
+
+      const jsonCall = (response.json as ReturnType<typeof vi.fn>).mock.calls[0][0] as {
+        flight_category_color: string;
+      };
+      expect(jsonCall.flight_category_color).toBe(expectedColor);
+    });
+
+    it('should fall back to a default color for an unrecognized flight category', async () => {
+      mockGetAirportInfo.mockResolvedValue(mockAirportResponse);
+      mockGetMetar.mockResolvedValue({
+        metar: {
+          ...mockMetarResponse.metar,
+          visibilityRating: 'UNKNOWN',
+        },
+      });
+
+      const request = createMockRequest();
+      const response = createMockResponse();
+
+      await handler(request, response);
+
+      const jsonCall = (response.json as ReturnType<typeof vi.fn>).mock.calls[0][0] as {
+        flight_category_color: string;
+      };
+      expect(jsonCall.flight_category_color).toBe('#444444');
     });
   });
 

@@ -4,6 +4,15 @@ import { GarminService } from '../services/GarminService';
 import type { SkyCondition } from '../models/metar/SkyCondition';
 import type { MetarOutput } from '../models/metar/MetarOutput';
 
+const FLIGHT_CATEGORY_COLORS: Record<string, string> = {
+  VFR: '#00aa00',
+  MVFR: '#0000aa',
+  IFR: '#aa0000',
+  LIFR: '#aa00aa',
+};
+
+const DEFAULT_FLIGHT_CATEGORY_COLOR = '#444444';
+
 class MetarEndpoint extends ApiEndpoint {
   private garminService: GarminService;
 
@@ -84,6 +93,9 @@ class MetarEndpoint extends ApiEndpoint {
       dewpoint: metarData.dewPointC,
       id: metarData.station,
       flight_category: metarData.visibilityRating,
+      flight_category_color:
+        FLIGHT_CATEGORY_COLORS[metarData.visibilityRating.toUpperCase()] ??
+        DEFAULT_FLIGHT_CATEGORY_COLOR,
       observation_time: time,
       raw_text: metarData.rawReport,
       sky_conditions: sky_conditions,
